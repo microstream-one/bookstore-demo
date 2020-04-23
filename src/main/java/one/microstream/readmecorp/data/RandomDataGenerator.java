@@ -28,57 +28,58 @@ import one.microstream.storage.types.EmbeddedStorageManager;
 
 final class RandomDataGenerator implements HasLogger
 {
+	@SuppressWarnings("serial")
 	private static class CountryData extends ArrayList<City>
 	{
 		Faker                     faker;
 		Locale                    locale;
 		List<Shop>                shops;
 		Map<City, List<Customer>> people;
-		
+
 		CountryData(
 			final Faker faker,
 			final Locale locale
 		)
 		{
 			super(512);
-			
+
 			this.faker   = faker;
 			this.locale  = locale;
-			
+
 			this.shops = new ArrayList<>();
 		}
-		
+
 		City randomCity(final Random random)
 		{
 			return this.get(random.nextInt(this.size()));
 		}
-		
+
 		Customer randomCustomer(final Random random)
 		{
 			return this.randomCustomer(random, this.randomCity(random));
 		}
-		
+
 		Customer randomCustomer(final Random random, final City city)
 		{
 			final List<Customer> peopleOfCity = this.people.get(city);
 			return peopleOfCity.get(random.nextInt(peopleOfCity.size()));
 		}
-		
+
 		void dispose()
 		{
 			this.faker = null;
 			this.locale = null;
-			
+
 			this.shops.clear();
 			this.shops = null;
-			
+
 			this.people.values().forEach(List::clear);
 			this.people.clear();
-			
+
 			this.clear();
 		}
 	}
-	
+
 	private final Books.Mutable          books;
 	private final List<Shop>             shops;
 	private final List<Customer>         customers;
@@ -89,7 +90,7 @@ final class RandomDataGenerator implements HasLogger
 	private final Faker                  faker;
 	private final Set<String>            usedIsbns;
 	private final List<Book>             bookList;
-	
+
 	RandomDataGenerator(
 		final Books.Mutable books,
 		final List<Shop> shops,
@@ -100,36 +101,36 @@ final class RandomDataGenerator implements HasLogger
 	)
 	{
 		super();
-		
+
 		this.books          = books;
 		this.shops          = shops;
 		this.customers      = customers;
 		this.purchases      = purchases;
 		this.dataAmount     = dataAmount;
 		this.storageManager = storageManager;
-		
+
 		this.random    = new Random();
 		this.faker     = Faker.instance();
 		this.usedIsbns = new HashSet<>(4096);
 		this.bookList  = new ArrayList<>(4096);
 	}
-	
+
 	DataMetrics generate()
 	{
 		final List<Locale> locales = this.supportedLocales();
-		
+
 		this.logger().info("+ " + locales.size() + " locales");
-		
+
 		final List<CountryData> countries = locales.parallelStream()
 			.map(this::createCountry)
 			.collect(toList());
-		
+
 		this.createBooks(countries);
-		
+
 		this.createShops(countries);
-		
+
 		this.createPurchases(countries);
-		
+
 		final DataMetrics metrics = DataMetrics.New(
 			this.books.size(),
 			countries.size(),
@@ -141,12 +142,12 @@ final class RandomDataGenerator implements HasLogger
 		this.bookList.clear();
 		countries.forEach(CountryData::dispose);
 		countries.clear();
-		
+
 		this.gc();
-		
+
 		return metrics;
 	}
-	
+
 	private List<Locale> supportedLocales()
 	{
 		final List<Locale> locales = Arrays.asList(
@@ -162,7 +163,7 @@ final class RandomDataGenerator implements HasLogger
 			new Locale("hu", "HU"),
 			new Locale("pl", "PL")
 		);
-		
+
 		final int maxCountries = this.dataAmount.maxCountries();
 		final int max = maxCountries == -1
 			? locales.size()
@@ -177,7 +178,7 @@ final class RandomDataGenerator implements HasLogger
 	)
 	{
 		this.logger().info("> country " + locale.getDisplayCountry());
-		
+
 		final Faker              faker       = Faker.instance(locale);
 		final Set<String>        cityNameSet = new HashSet<>();
 		final Map<String, State> stateMap    = new HashMap<>();
@@ -200,20 +201,20 @@ final class RandomDataGenerator implements HasLogger
 				countryData.add(City.New(cityName, state));
 			}
 		});
-		
+
 		countryData.people = new HashMap<>(countryData.size(), 1.0f);
 		countryData.parallelStream().forEach(city -> {
 			countryData.people.put(city, this.createCustomers(countryData, city));
 		});
-		
+
 		this.logger().info(
 			"+ country " + locale.getDisplayCountry() + " [" + countryData.size() + " cities, " +
 				countryData.people.values().stream().mapToInt(List::size).sum() + " customers] "
 		);
-		
+
 		return countryData;
 	}
-	
+
 	private List<Customer> createCustomers(
 		final CountryData countryData,
 		final City city
@@ -226,7 +227,7 @@ final class RandomDataGenerator implements HasLogger
 			))
 			.collect(toList());
 	}
-	
+
 	private void createBooks(
 		final List<CountryData> countries
 	)
@@ -235,7 +236,7 @@ final class RandomDataGenerator implements HasLogger
 		countries.parallelStream().forEach(country ->
 		{
 			this.logger().info("> books in " + country.locale.getDisplayCountry());
-			
+
 			final List<Publisher> publishers = this.createPublishers(country);
 			final List<Author>    authors    = this.createAuthors(country);
 			final Language        language   = Language.New(country.locale);
@@ -243,13 +244,13 @@ final class RandomDataGenerator implements HasLogger
 				.mapToObj(i -> country.faker.book().title())
 				.map(title -> this.createBook(country, genres, publishers, authors, language, title))
 				.collect(toList());
-			
+
 			this.books.addAll(books);
 			synchronized(this.bookList)
 			{
 				this.bookList.addAll(books);
 			}
-			
+
 			this.logger().info("+ " + books.size() + " books in "+ country.locale.getDisplayCountry());
 		});
 
@@ -257,7 +258,7 @@ final class RandomDataGenerator implements HasLogger
 		storer.store(this.books);
 		storer.commit();
 	}
-	
+
 	private Book createBook(
 		final CountryData country,
 		final List<Genre> genres,
@@ -281,7 +282,7 @@ final class RandomDataGenerator implements HasLogger
 		final double    price     = this.createPrice(5.0, 25.0);
 		return Book.New(isbn, title, author, genre, publisher, language, price);
 	}
-	
+
 	private List<Genre> createGenres()
 	{
 		return this.randomRange(this.dataAmount.maxGenres())
@@ -290,7 +291,7 @@ final class RandomDataGenerator implements HasLogger
 			.map(Genre::New)
 			.collect(toList());
 	}
-	
+
 	private List<Publisher> createPublishers(
 		final CountryData countryData
 	)
@@ -301,7 +302,7 @@ final class RandomDataGenerator implements HasLogger
 			.map(name -> Publisher.New(name, this.createAddress(countryData.randomCity(this.random), countryData.faker)))
 			.collect(toList());
 	}
-	
+
 	private List<Author> createAuthors(
 		final CountryData countryData
 	)
@@ -312,7 +313,7 @@ final class RandomDataGenerator implements HasLogger
 			.map(name -> Author.New(name, this.createAddress(countryData.randomCity(this.random), countryData.faker)))
 			.collect(toList());
 	}
-	
+
 	private void createShops(
 		final List<CountryData> countries
 	)
@@ -329,11 +330,11 @@ final class RandomDataGenerator implements HasLogger
 
 			this.logger().info("+ " + country.shops.size() + " shops in " + country.locale.getDisplayCountry());
 		});
-		
+
 		countries.forEach(country -> this.shops.addAll(country.shops));
 		this.storageManager.store(this.shops);
 	}
-	
+
 	private Shop createShop(
 		final List<CountryData> countries,
 		final CountryData countryData,
@@ -353,24 +354,24 @@ final class RandomDataGenerator implements HasLogger
 			));
 		return new Shop.Default(name, address, employees, new Inventory.Default(inventory));
 	}
-	
+
 	private void createPurchases(
 		final List<CountryData> countries
 	)
 	{
 		final Set<Customer> customers = new HashSet<>(4096);
-		
+
 		final int           thisYear  = Year.now().getValue();
 		final int           startYear = thisYear - this.randomMax(this.dataAmount.maxAgeOfShopsInYears()) + 1;
 		IntStream.rangeClosed(startYear, thisYear).forEach(
 			year -> this.createPurchases(countries, year, customers)
 		);
-		
+
 		this.customers.addAll(customers);
 		customers.clear();
 		this.storageManager.store(this.customers);
 	}
-	
+
 	private void createPurchases(
 		final List<CountryData> countries,
 		final int year,
@@ -378,7 +379,7 @@ final class RandomDataGenerator implements HasLogger
 	)
 	{
 		this.logger().info("> purchases in " + year);
-		
+
 		final List<Purchase> purchases = countries.parallelStream()
 			.flatMap(
 				country -> country.shops.stream().flatMap(
@@ -386,19 +387,19 @@ final class RandomDataGenerator implements HasLogger
 				)
 			)
 			.collect(toList());
-				
+
 		final Set<Customer> customersForYear = this.purchases.init(year, purchases, this.storageManager);
 
 		this.logger().info("+ " + purchases.size() + " purchases in " + year);
-		
+
 		customers.addAll(customersForYear);
-		
+
 		customersForYear.clear();
 		purchases.clear();
-		
+
 		this.gc();
 	}
-	
+
 	private Stream<Purchase> createPurchases(
 		final CountryData countryData,
 		final int year,
@@ -435,12 +436,12 @@ final class RandomDataGenerator implements HasLogger
 		return LocalDateTime.of(year, month.getValue(), dayOfMonth, hour, minute)
 			.toInstant(ZoneOffset.UTC).toEpochMilli();
 	}
-	
+
 	private Book randomBook()
 	{
 		return this.bookList.get(this.random.nextInt(this.bookList.size()));
 	}
-	
+
 	private List<Employee> createEmployees(
 		final CountryData countryData,
 		final City city
@@ -453,7 +454,7 @@ final class RandomDataGenerator implements HasLogger
 			))
 			.collect(toList());
 	}
-	
+
 	private Address createAddress(
 		final City city,
 		final Faker faker
@@ -467,22 +468,22 @@ final class RandomDataGenerator implements HasLogger
 			city
 		);
 	}
-	
+
 	private double createPrice(
 		final double min,
 		final double max
 	)
 	{
-		return min + (this.random.nextDouble() * (max - min));
+		return min + this.random.nextDouble() * (max - min);
 	}
-		
+
 	private IntStream randomRange(
 		final int upperBoundInclusive
 	)
 	{
 		return IntStream.rangeClosed(0, this.randomMax(upperBoundInclusive));
 	}
-	
+
 	private int randomMax(
 		final int upperBoundInclusive
 	)
@@ -495,12 +496,12 @@ final class RandomDataGenerator implements HasLogger
 		}
 		return max;
 	}
-	
+
 	private void gc()
 	{
 //		this.storageManager.persistenceManager().objectRegistry().clear();
 //		this.storageManager.issueCacheCheck(Long.MAX_VALUE, (s, t, e) -> true);
 		System.gc();
 	}
-	
+
 }
