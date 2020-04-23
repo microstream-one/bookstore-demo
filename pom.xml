@@ -1,0 +1,89 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>one.microstream</groupId>
+	<artifactId>playground-readmecorp</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<name>MicroStream ReadMeCorp Playground</name>
+
+	<developers>
+		<developer>
+			<name>Microstream Software</name>
+			<url>http://microstream.one</url>
+		</developer>
+	</developers>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<microstream.version>02.02.00-MS-GA</microstream.version>
+		<lucene.version>8.4.1</lucene.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>microstream-maven-releases</id>
+			<url>https://repo.microstream.one/repository/maven-public/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>one.microstream</groupId>
+			<artifactId>storage.embedded</artifactId>
+			<version>${microstream.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>one.microstream</groupId>
+			<artifactId>storage.embedded.configuration</artifactId>
+			<version>${microstream.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>info.picocli</groupId>
+			<artifactId>picocli</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jline</groupId>
+			<artifactId>jline</artifactId>
+			<version>3.14.1</version>
+		</dependency>
+		<dependency>
+			<groupId>one.microstream</groupId>
+			<artifactId>persistence.binary.jdk8</artifactId>
+			<version>${microstream.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.javafaker</groupId>
+			<artifactId>javafaker</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queryparser</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.rapidpm</groupId>
+			<artifactId>rapidpm-logger-adapter</artifactId>
+			<version>01.00.03-RPM</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.30</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+</project>
