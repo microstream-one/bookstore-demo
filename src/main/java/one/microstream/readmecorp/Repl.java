@@ -121,24 +121,23 @@ public class Repl implements Runnable
 
 		CmdDesc commandDescription(final CmdLine line)
 		{
-			CmdDesc out = null;
 			switch(line.getDescriptionType())
 			{
 				case COMMAND:
 					final String cmd = Parser.getCommand(line.getArgs().get(0));
 					if(this.builtins.hasCommand(cmd))
 					{
-						out = this.builtins.commandDescription(cmd);
+						return this.builtins.commandDescription(cmd);
 					}
-					else if(this.picocli.hasCommand(cmd))
+					if(this.picocli.hasCommand(cmd))
 					{
-						out = this.picocli.commandDescription(cmd);
+						return this.picocli.commandDescription(cmd);
 					}
 					break;
 				default:
 					break;
 			}
-			return out;
+			return null;
 		}
 	}
 }
