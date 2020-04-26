@@ -1,59 +1,144 @@
 package one.microstream.readmecorp;
 
-import java.io.Console;
-import java.util.List;
-import java.util.Scanner;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 
+import org.jline.builtins.Builtins;
+import org.jline.builtins.Completers.SystemCompleter;
+import org.jline.builtins.Widgets.CmdDesc;
+import org.jline.builtins.Widgets.CmdLine;
+import org.jline.builtins.Widgets.TailTipWidgets;
+import org.jline.builtins.Widgets.TailTipWidgets.TipType;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.MaskingCallback;
 import org.jline.reader.ParsedLine;
 import org.jline.reader.Parser;
 import org.jline.reader.impl.DefaultParser;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 
+import one.microstream.exceptions.IORuntimeException;
 import picocli.CommandLine;
+import picocli.shell.jline3.PicocliCommands;
 
 
 public class Repl implements Runnable
 {
 	private final ReadMeCorp readMeCorp;
-	private Console          console;
-	private Scanner          scanner;
 
 
 	public Repl(final ReadMeCorp readMeCorp)
 	{
 		this.readMeCorp = readMeCorp;
-
-		if((this.console = System.console()) == null)
-		{
-			this.scanner = new Scanner(System.in);
-		}
 	}
 
 	@Override
 	public void run()
 	{
-		// initialize firstexit
+		// initialize first
 		this.readMeCorp.data();
 
-		final CommandLine cli    = Commands.createCommandLine(this.readMeCorp);
-		final Parser      parser = new DefaultParser();
-
-		cli.usage(System.out);
-
-		while(true)
+		final Path            workDir         = Paths.get("");
+		final Builtins        builtins        = new Builtins(workDir, null, null);
+		builtins.rename(Builtins.Command.TTOP, "top");
+        builtins.alias("zle", "widget");
+        builtins.alias("bindkey", "keymap");
+		final SystemCompleter systemCompleter = builtins.compileCompleters();
+		final CommandLine     cli             = Commands.createCommandLine(this.readMeCorp);
+		final PicocliCommands picocliCommands = new PicocliCommands(workDir, cli);
+		systemCompleter.add(picocliCommands.compileCompleters());
+		systemCompleter.compile();
+		Terminal terminal;
+        try
 		{
-			System.out.print("ReadMeCorp > ");
-
-			final String       line       = this.readLine();
-			final ParsedLine   parsedLine = parser.parse(line, line.length());
-			final List<String> words      = parsedLine.words();
-			cli.execute(words.toArray(new String[words.size()]));
+			terminal = TerminalBuilder.builder().build();
 		}
+		catch(final IOException e)
+		{
+			throw new IORuntimeException(e);
+		}
+        final LineReader reader = LineReaderBuilder.builder()
+                .terminal(terminal)
+                .completer(systemCompleter)
+                .parser(new DefaultParser())
+                .variable(LineReader.LIST_MAX, 50)
+                .build();
+        builtins.setLineReader(reader);
+        final DescriptionGenerator descriptionGenerator = new DescriptionGenerator(builtins, picocliCommands);
+        new TailTipWidgets(reader, descriptionGenerator::commandDescription, 5, TipType.COMPLETER);
+
+		final String prompt      = "rmc> ";
+		final String rightPrompt = null;
+
+        while(true)
+        {
+        	final String line = reader.readLine(prompt, rightPrompt, (MaskingCallback) null, null);
+            if(line.matches("^\\s*#.*"))
+            {
+                continue;
+            }
+			final ParsedLine pl        = reader.getParser().parse(line, 0);
+			final String[]   arguments = pl.words().toArray(new String[0]);
+			final String     command   = Parser.getCommand(pl.word());
+            if(builtins.hasCommand(command))
+            {
+                try
+				{
+					builtins.execute(
+						command,
+						Arrays.copyOfRange(arguments, 1, arguments.length),
+						System.in,
+						System.out,
+						System.err
+					);
+				}
+				catch(final Exception e)
+				{
+					throw new RuntimeException(e);
+				}
+            }
+            else
+            {
+                cli.execute(arguments);
+            }
+        }
 	}
 
-	private String readLine()
+
+	private static class DescriptionGenerator
 	{
-		return this.console != null
-			? this.console.readLine().trim()
-			: this.scanner.nextLine();
+		Builtins        builtins;
+		PicocliCommands picocli;
+
+		public DescriptionGenerator(final Builtins builtins, final PicocliCommands picocli)
+		{
+			this.builtins = builtins;
+			this.picocli  = picocli;
+		}
+
+		CmdDesc commandDescription(final CmdLine line)
+		{
+			CmdDesc out = null;
+			switch(line.getDescriptionType())
+			{
+				case COMMAND:
+					final String cmd = Parser.getCommand(line.getArgs().get(0));
+					if(this.builtins.hasCommand(cmd))
+					{
+						out = this.builtins.commandDescription(cmd);
+					}
+					else if(this.picocli.hasCommand(cmd))
+					{
+						out = this.picocli.commandDescription(cmd);
+					}
+					break;
+				default:
+					break;
+			}
+			return out;
+		}
 	}
 }
