@@ -1,9 +1,9 @@
 
-package one.microstream.demo.bookstore.data;
+package one.microstream.demo.bookstore;
 
-public interface Employee extends NamedWithAddress
+public interface Customer extends NamedWithAddress
 {
-	public static Employee New(
+	public static Customer New(
 		final String name,
 		final Address address
 	)
@@ -11,7 +11,7 @@ public interface Employee extends NamedWithAddress
 		return new Default(name, address);
 	}
 	
-	public static class Default extends NamedWithAddress.Abstract implements Employee
+	public static class Default extends NamedWithAddress.Abstract implements Customer
 	{
 		public Default(
 			final String name,

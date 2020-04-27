@@ -1,9 +1,9 @@
 
-package one.microstream.demo.bookstore.data;
+package one.microstream.demo.bookstore;
 
-public interface Author extends NamedWithAddress
+public interface Publisher extends NamedWithAddress
 {
-	public static Author New(
+	public static Publisher New(
 		final String name,
 		final Address address
 	)
@@ -11,7 +11,7 @@ public interface Author extends NamedWithAddress
 		return new Default(name, address);
 	}
 	
-	public static class Default extends NamedWithAddress.Abstract implements Author
+	public static class Default extends NamedWithAddress.Abstract implements Publisher
 	{
 		public Default(
 			final String name,

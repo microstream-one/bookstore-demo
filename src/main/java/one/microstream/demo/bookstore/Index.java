@@ -1,11 +1,12 @@
 
-package one.microstream.demo.bookstore.data;
+package one.microstream.demo.bookstore;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -35,24 +36,15 @@ public interface Index<T> extends Closeable
 	{
 	}
 
-	public void add(
-		T entity
-	);
+	public void add(T entity);
 
-	public void addAll(
-		Iterable<T> entities
-	);
+	public void addAll(Collection<? extends T> entities);
 
-	public void remove(
-		Query query
-	);
+	public void remove(Query query);
 
 	public void clear();
 
-	public List<T> search(
-		Query query,
-		int maxResults
-	);
+	public List<T> search(Query query, int maxResults);
 
 	public QueryBuilder createQueryBuilder();
 
@@ -78,6 +70,7 @@ public interface Index<T> extends Closeable
 		private final EntityMatcher<T>     entityMatcher;
 		private MMapDirectory              directory;
 		private IndexWriter                writer;
+		private DirectoryReader            reader;
 		private IndexSearcher              searcher;
 
 		Default(
@@ -115,7 +108,7 @@ public interface Index<T> extends Closeable
 
 		@Override
 		public synchronized void addAll(
-			final Iterable<T> entities
+			final Collection<? extends T> entities
 		)
 		{
 			this.lazyInit();
@@ -158,7 +151,7 @@ public interface Index<T> extends Closeable
 		}
 
 		@Override
-		public void clear()
+		public synchronized void clear()
 		{
 			this.lazyInit();
 
@@ -223,41 +216,53 @@ public interface Index<T> extends Closeable
 
 		private void lazyInit()
 		{
-			if(this.directory == null)
+			try
 			{
-				final Path path = Paths.get(
-					"data",
-					"index",
-					this.entityType.getSimpleName()
-				);
-				try
+				if(this.directory == null)
 				{
+					final Path path = Paths.get(
+						"data",
+						"index",
+						this.entityType.getSimpleName()
+					);
 					this.directory = new MMapDirectory(path);
 					this.writer = new IndexWriter(
 						this.directory,
 						new IndexWriterConfig(new StandardAnalyzer())
 					);
 					this.searcher = new IndexSearcher(
-						DirectoryReader.open(this.writer)
+						this.reader = DirectoryReader.open(this.writer)
 					);
 				}
-				catch(final IOException e)
+				else
 				{
-					throw new IORuntimeException(e);
+					final DirectoryReader newReader = DirectoryReader.openIfChanged(this.reader);
+					if(newReader != null && newReader != this.reader)
+					{
+						this.reader.close();
+						this.reader   = newReader;
+						this.searcher = new IndexSearcher(this.reader);
+					}
 				}
+			}
+			catch(final IOException e)
+			{
+				throw new IORuntimeException(e);
 			}
 		}
 
 		@Override
-		public void close() throws IOException
+		public synchronized void close() throws IOException
 		{
 			if(this.directory != null)
 			{
 				this.writer.close();
+				this.reader.close();
 				this.directory.close();
 
 				this.directory = null;
 				this.writer    = null;
+				this.reader    = null;
 				this.searcher  = null;
 			}
 		}

@@ -1,8 +1,5 @@
 
-package one.microstream.demo.bookstore.dal;
-
-import one.microstream.demo.bookstore.data.Book;
-
+package one.microstream.demo.bookstore;
 
 public class BookSales implements Comparable<BookSales>
 {
@@ -40,7 +37,7 @@ public class BookSales implements Comparable<BookSales>
 	@Override
 	public String toString()
 	{
-		return "Default [book=" + this.book + ", amount=" + this.amount + "]";
+		return "BookSales [book=" + this.book + ", amount=" + this.amount + "]";
 	}
 
 }

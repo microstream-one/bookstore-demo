@@ -1,9 +1,5 @@
 
-package one.microstream.demo.bookstore.data;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+package one.microstream.demo.bookstore;
 
 import one.microstream.storage.types.EmbeddedStorageManager;
 
@@ -11,59 +7,59 @@ import one.microstream.storage.types.EmbeddedStorageManager;
 public interface Data
 {
 	public Books books();
-	
-	public Stream<Shop> shops();
-	
-	public Stream<Customer> customers();
-		
+
+	public Shops shops();
+
+	public Customers customers();
+
 	public Purchases purchases();
-	
-	public DataMetrics populate(
-		final RandomDataAmount initialDataSize,
-		final EmbeddedStorageManager storageManager
-	);
-	
-	public static Data New()
+
+
+	public static interface Mutable extends Data
 	{
-		return new Default();
+		public DataMetrics populate(
+			final RandomDataAmount initialDataSize,
+			final EmbeddedStorageManager storageManager
+		);
 	}
-	
-	public static class Default implements Data
+
+
+	public static class Default implements Data.Mutable
 	{
 		private final Books.Mutable     books     = new Books.Default();
-		private final List<Shop>        shops     = new ArrayList<>(1024);
-		private final List<Customer>    customers = new ArrayList<>(16384);
+		private final Shops.Mutable     shops     = new Shops.Default();
+		private final Customers.Mutable customers = new Customers.Default();
 		private final Purchases.Mutable purchases = new Purchases.Default();
-		
+
 		Default()
 		{
 			super();
 		}
-		
+
 		@Override
 		public Books books()
 		{
 			return this.books;
 		}
-		
+
 		@Override
-		public Stream<Shop> shops()
+		public Shops shops()
 		{
-			return this.shops.stream();
+			return this.shops;
 		}
-		
+
 		@Override
-		public Stream<Customer> customers()
+		public Customers customers()
 		{
-			return this.customers.stream();
+			return this.customers;
 		}
-				
+
 		@Override
 		public Purchases purchases()
 		{
 			return this.purchases;
 		}
-		
+
 		@Override
 		public DataMetrics populate(
 			final RandomDataAmount initialDataSize,
@@ -79,12 +75,12 @@ public interface Data
 				storageManager
 			)
 			.generate();
-			
+
 			System.gc();
-			
+
 			return metrics;
 		}
-		
+
 	}
-	
+
 }

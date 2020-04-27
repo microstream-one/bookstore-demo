@@ -1,5 +1,5 @@
 
-package one.microstream.demo.bookstore.data;
+package one.microstream.demo.bookstore;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package one.microstream.demo.bookstore.data;
+package one.microstream.demo.bookstore;
 
 import static one.microstream.X.coalesce;
 

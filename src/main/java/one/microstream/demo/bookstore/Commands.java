@@ -3,11 +3,6 @@ package one.microstream.demo.bookstore;
 import java.time.Year;
 import java.util.List;
 
-import one.microstream.demo.bookstore.dal.BookSales;
-import one.microstream.demo.bookstore.dal.DataAccess;
-import one.microstream.demo.bookstore.data.Book;
-import one.microstream.demo.bookstore.data.Country;
-import one.microstream.demo.bookstore.data.Employee;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -36,10 +31,22 @@ public class Commands
 			this.bookStoreDemo = bookStoreDemo;
 		}
 
-		DataAccess dataAccess()
+		Data data()
 		{
-			return DataAccess.New(this.bookStoreDemo.data());
+			return this.bookStoreDemo.data();
 		}
+
+		Country searchCountry(final String countryCode)
+		{
+			return this.data().shops().compute(shops ->
+				shops.map(s -> s.address().city().state().country())
+					.distinct()
+					.filter(c -> c.code().equalsIgnoreCase(countryCode))
+					.findAny()
+					.orElse(null)
+			);
+		}
+
 	}
 
 	@Command(
@@ -63,7 +70,7 @@ public class Commands
 		@Override
 		public void run()
 		{
-			final List<Book> books = this.dataAccess().booksByTitle(this.query);
+			final List<Book> books = this.data().books().searchByTitle(this.query);
 			if(books.isEmpty())
 			{
 				System.out.println("No books found");
@@ -109,15 +116,13 @@ public class Commands
 		@Override
 		public void run()
 		{
-			final DataAccess dataAccess = this.dataAccess();
-
 			final int year = this.year == 0
 				? Year.now().getValue()
 				: this.year;
 
 			if(this.country.isEmpty())
 			{
-				final List<BookSales> bestSellerList = dataAccess.bestSellerList(year);
+				final List<BookSales> bestSellerList = this.data().purchases().bestSellerList(year);
 				if(bestSellerList.isEmpty())
 				{
 					System.out.println("No books sold in " + year);
@@ -136,21 +141,14 @@ public class Commands
 			}
 			else
 			{
-				final Country country = dataAccess.data()
-					.shops()
-					.map(s -> s.address().city().state().country())
-					.distinct()
-					.filter(c -> c.code().equalsIgnoreCase(this.country))
-					.findAny()
-					.orElse(null);
-
+				final Country country = this.searchCountry(this.country);
 				if(country == null)
 				{
 					System.out.println("Country not found");
 				}
 				else
 				{
-					final List<BookSales> bestSellerList = dataAccess.bestSellerList(year, country);
+					final List<BookSales> bestSellerList = this.data().purchases().bestSellerList(year, country);
 					if(bestSellerList.isEmpty())
 					{
 						System.out.println("No books sold in " + country.name() + " in " + year);
@@ -202,35 +200,26 @@ public class Commands
 		@Override
 		public void run()
 		{
-			final DataAccess dataAccess = this.dataAccess();
-
 			final int year = this.year == 0
 				? Year.now().getValue()
 				: this.year;
 
 			if(this.country.isEmpty())
 			{
-				final long count = dataAccess.countPurchasesOfForeigners(year);
+				final long count = this.data().purchases().countPurchasesOfForeigners(year);
 				System.out.println("Purchases of foreigners in " + year);
 				System.out.println(count);
 			}
 			else
 			{
-				final Country country = dataAccess.data()
-					.shops()
-					.map(s -> s.address().city().state().country())
-					.distinct()
-					.filter(c -> c.code().equalsIgnoreCase(this.country))
-					.findAny()
-					.orElse(null);
-
+				final Country country = this.searchCountry(this.country);
 				if(country == null)
 				{
 					System.out.println("Country not found");
 				}
 				else
 				{
-					final long count = dataAccess.countPurchasesOfForeigners(year, country);
+					final long count = this.data().purchases().countPurchasesOfForeigners(year, country);
 					System.out.println("Purchases of foreigners in " + country.name() + " in " + year);
 					System.out.println(count);
 				}
@@ -269,35 +258,26 @@ public class Commands
 		@Override
 		public void run()
 		{
-			final DataAccess dataAccess = this.dataAccess();
-
 			final int year = this.year == 0
 				? Year.now().getValue()
 				: this.year;
 
 			if(this.country.isEmpty())
 			{
-				final Employee employee = dataAccess.employeeOfTheYear(year);
+				final Employee employee = this.data().purchases().employeeOfTheYear(year);
 				System.out.println("Employee of the year " + year);
 				System.out.println(employee.name());
 			}
 			else
 			{
-				final Country country = dataAccess.data()
-					.shops()
-					.map(s -> s.address().city().state().country())
-					.distinct()
-					.filter(c -> c.code().equalsIgnoreCase(this.country))
-					.findAny()
-					.orElse(null);
-
+				final Country country = this.searchCountry(this.country);
 				if(country == null)
 				{
 					System.out.println("Country not found");
 				}
 				else
 				{
-					final Employee employee = dataAccess.employeeOfTheYear(year, country);
+					final Employee employee = this.data().purchases().employeeOfTheYear(year, country);
 					System.out.println("Employee of the year " + year + " in " + country.name());
 					System.out.println(employee.name());
 				}

@@ -1,4 +1,4 @@
-package one.microstream.demo.bookstore.data;
+package one.microstream.demo.bookstore;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.toMap;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.Year;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -81,8 +80,8 @@ final class RandomDataGenerator implements HasLogger
 	}
 
 	private final Books.Mutable          books;
-	private final List<Shop>             shops;
-	private final List<Customer>         customers;
+	private final Shops.Mutable          shops;
+	private final Customers.Mutable      customers;
 	private final Purchases.Mutable      purchases;
 	private final RandomDataAmount       dataAmount;
 	private final EmbeddedStorageManager storageManager;
@@ -93,8 +92,8 @@ final class RandomDataGenerator implements HasLogger
 
 	RandomDataGenerator(
 		final Books.Mutable books,
-		final List<Shop> shops,
-		final List<Customer> customers,
+		final Shops.Mutable shops,
+		final Customers.Mutable customers,
 		final Purchases.Mutable purchases,
 		final RandomDataAmount dataAmount,
 		final EmbeddedStorageManager storageManager
@@ -132,12 +131,12 @@ final class RandomDataGenerator implements HasLogger
 		this.createPurchases(countries);
 
 		final DataMetrics metrics = DataMetrics.New(
-			this.books.size(),
+			this.books.bookCount(),
 			countries.size(),
-			this.shops.size()
+			this.shops.shopCount()
 		);
 
-		this.shops.forEach(Shop::clear);
+		this.shops.clear();
 		this.usedIsbns.clear();
 		this.bookList.clear();
 		countries.forEach(CountryData::dispose);
@@ -331,8 +330,7 @@ final class RandomDataGenerator implements HasLogger
 			this.logger().info("+ " + country.shops.size() + " shops in " + country.locale.getDisplayCountry());
 		});
 
-		countries.forEach(country -> this.shops.addAll(country.shops));
-		this.storageManager.store(this.shops);
+		countries.forEach(country -> this.shops.addAll(country.shops, this.storageManager));
 	}
 
 	private Shop createShop(
@@ -367,9 +365,8 @@ final class RandomDataGenerator implements HasLogger
 			year -> this.createPurchases(countries, year, customers)
 		);
 
-		this.customers.addAll(customers);
+		this.customers.addAll(customers, this.storageManager);
 		customers.clear();
-		this.storageManager.store(this.customers);
 	}
 
 	private void createPurchases(
@@ -414,7 +411,7 @@ final class RandomDataGenerator implements HasLogger
 				final Customer customer = pi % 10 == 0
 					? countryData.randomCustomer(random)
 					: countryData.randomCustomer(random, shop.address().city());
-				final long timestamp = this.randomDateTime(year, isLeapYear, random);
+				final LocalDateTime timestamp = this.randomDateTime(year, isLeapYear, random);
 				final List<Purchase.Item> items = this.randomRange(this.dataAmount.maxItemsPerPurchase())
 					.mapToObj(ii -> Purchase.Item.New(books.get(random.nextInt(books.size())), random.nextInt(3)))
 					.collect(toList());
@@ -423,7 +420,7 @@ final class RandomDataGenerator implements HasLogger
 		);
 	}
 
-	private long randomDateTime(
+	private LocalDateTime randomDateTime(
 		final int year,
 		final boolean isLeapYear,
 		final Random random
@@ -433,8 +430,7 @@ final class RandomDataGenerator implements HasLogger
 		final int   dayOfMonth = random.nextInt(month.length(isLeapYear)) + 1;
 		final int   hour       = 8 + random.nextInt(11);
 		final int   minute     = random.nextInt(60);
-		return LocalDateTime.of(year, month.getValue(), dayOfMonth, hour, minute)
-			.toInstant(ZoneOffset.UTC).toEpochMilli();
+		return LocalDateTime.of(year, month.getValue(), dayOfMonth, hour, minute);
 	}
 
 	private Book randomBook()

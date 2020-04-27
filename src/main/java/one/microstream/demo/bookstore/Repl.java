@@ -70,7 +70,7 @@ public class Repl implements Runnable
         final DescriptionGenerator descriptionGenerator = new DescriptionGenerator(builtins, picocliCommands);
         new TailTipWidgets(reader, descriptionGenerator::commandDescription, 5, TipType.COMPLETER);
 
-		final String prompt      = "rmc> ";
+		final String prompt      = "BookStore> ";
 		final String rightPrompt = null;
 
         while(true)
