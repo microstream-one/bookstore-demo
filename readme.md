@@ -5,5 +5,3 @@
 ![BookStore Demo](docs/images/bookstoredemo.svg?raw=true)
 
 Just start the main class [one.microstream.demo.bookstore.Application](src/main/java/one/microstream/demo/bookstore/Application.java) and talk to the console.
-
-In the console you can execute a bunch of predefined queries of the [DataAccess](src/main/java/one/microstream/demo/bookstore/dal/DataAccess.java) class.
