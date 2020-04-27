@@ -4,10 +4,15 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>one.microstream</groupId>
-	<artifactId>playground-readmecorp</artifactId>
+	<artifactId>bookstore-demo</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 
-	<name>MicroStream ReadMeCorp Playground</name>
+	<name>MicroStream BookStore Demo</name>
+
+	<organization>
+		<name>Microstream Software</name>
+		<url>http://microstream.one</url>
+	</organization>
 
 	<developers>
 		<developer>
@@ -21,7 +26,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<microstream.version>02.02.00-MS-GA</microstream.version>
+		<microstream.version>03.01.00-MS-GA-SNAPSHOT</microstream.version>
 		<lucene.version>8.4.1</lucene.version>
 	</properties>
 
