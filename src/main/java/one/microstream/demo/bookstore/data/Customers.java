@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import one.microstream.demo.bookstore.util.Mutex;
+import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
 import one.microstream.storage.types.StorageConnection;
 
 public interface Customers
@@ -20,7 +20,7 @@ public interface Customers
 	public void addAll(Collection<? extends Customer> customers, StorageConnection storage);
 
 
-	public static class Default extends Mutex.Owner implements Customers
+	public static class Default extends ReadWriteLocked.Scope implements Customers
 	{
 		private final List<Customer> customers = new ArrayList<>(1024);
 

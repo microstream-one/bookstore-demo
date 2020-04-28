@@ -10,27 +10,30 @@ import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetar
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.money.MonetaryAmount;
 
+import com.google.common.collect.Range;
+
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Purchase.Item;
-import one.microstream.demo.bookstore.util.Mutex;
+import one.microstream.demo.bookstore.util.concurrent.ReadWriteLockedStriped;
 import one.microstream.reference.Lazy;
 import one.microstream.storage.types.StorageConnection;
 
 
 public interface Purchases
 {
-	public IntStream years();
+	public Range<Integer> years();
 
 	public void clear(
 		int year
@@ -67,7 +70,7 @@ public interface Purchases
 	public void add(Purchase purchase, StorageConnection storage);
 
 
-	public static class Default extends Mutex.Owner implements Purchases
+	public static class Default extends ReadWriteLockedStriped.Scope implements Purchases
 	{
 		static class YearlyPurchases
 		{
@@ -155,7 +158,7 @@ public interface Purchases
 		}
 
 
-		private final Map<Integer, Lazy<YearlyPurchases>> yearToPurchases = new HashMap<>(32);
+		private final Map<Integer, Lazy<YearlyPurchases>> yearToPurchases = new ConcurrentHashMap<>(32);
 
 		Default()
 		{
@@ -168,9 +171,9 @@ public interface Purchases
 			final StorageConnection storage
 		)
 		{
-			this.write(() ->
+			final Integer year = purchase.timestamp().getYear();
+			this.write(year, () ->
 			{
-				final Integer               year = purchase.timestamp().getYear();
 				final Lazy<YearlyPurchases> lazy = this.yearToPurchases.get(year);
 				if(lazy != null)
 				{
@@ -195,7 +198,7 @@ public interface Purchases
 			final StorageConnection storage
 		)
 		{
-			return this.write(() ->
+			return this.write(year, () ->
 			{
 				final YearlyPurchases yearlyPurchases = new YearlyPurchases();
 				purchases.forEach(yearlyPurchases::add);
@@ -219,7 +222,7 @@ public interface Purchases
 			final int year
 		)
 		{
-			this.write(() ->
+			this.write(year, () ->
 			{
 				final Lazy<YearlyPurchases> lazy = this.yearToPurchases.get(year);
 				if(lazy != null && lazy.isStored())
@@ -230,13 +233,12 @@ public interface Purchases
 		}
 
 		@Override
-		public IntStream years()
+		public Range<Integer> years()
 		{
-			return this.read(() ->
-				this.yearToPurchases.keySet().stream()
-					.mapToInt(Integer::intValue)
-					.sorted()
-			);
+			final IntSummaryStatistics summary = this.yearToPurchases.keySet().stream()
+				.mapToInt(Integer::intValue)
+				.summaryStatistics();
+			return Range.closed(summary.getMin(), summary.getMax());
 		}
 
 		@Override
@@ -245,7 +247,7 @@ public interface Purchases
 			final Function<Stream<Purchase>, T> streamFunction
 		)
 		{
-			return this.read(() ->
+			return this.read(year, () ->
 			{
 				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
 				return streamFunction.apply(
@@ -265,7 +267,7 @@ public interface Purchases
 			final Function<Stream<Purchase>, T> streamFunction
 		)
 		{
-			return this.read(() ->
+			return this.read(year, () ->
 			{
 				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
 				return streamFunction.apply(
@@ -283,7 +285,7 @@ public interface Purchases
 			final Function<Stream<Purchase>, T> streamFunction
 		)
 		{
-			return this.read(() ->
+			return this.read(year, () ->
 			{
 				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
 				return streamFunction.apply(
@@ -301,7 +303,7 @@ public interface Purchases
 			final Function<Stream<Purchase>, T> streamFunction
 		)
 		{
-			return this.read(() ->
+			return this.read(year, () ->
 			{
 				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
 				return streamFunction.apply(
@@ -319,7 +321,7 @@ public interface Purchases
 			final Function<Stream<Purchase>, T> streamFunction
 		)
 		{
-			return this.read(() ->
+			return this.read(year, () ->
 			{
 				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
 				return streamFunction.apply(

@@ -19,7 +19,7 @@ import org.apache.lucene.util.QueryBuilder;
 
 import one.microstream.demo.bookstore.data.Index.DocumentPopulator;
 import one.microstream.demo.bookstore.data.Index.EntityMatcher;
-import one.microstream.demo.bookstore.util.Mutex;
+import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
 
 
 public interface Books
@@ -95,7 +95,7 @@ public interface Books
 	public void clear();
 
 
-	public static class Default extends Mutex.Owner implements Books
+	public static class Default extends ReadWriteLocked.Scope implements Books
 	{
 		private final Map<String, Book>          isbn13ToBook     = new HashMap<>(1024);
 		private final Map<Author, List<Book>>    authorToBooks    = new HashMap<>(512);

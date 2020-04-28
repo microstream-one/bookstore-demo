@@ -1,10 +1,10 @@
-package one.microstream.demo.bookstore.util;
+package one.microstream.demo.bookstore.util.concurrent;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-public interface Mutex
+public interface ReadWriteLocked
 {
 	public static interface ValueOperation<T>
 	{
@@ -26,15 +26,15 @@ public interface Mutex
 	public void write(VoidOperation op);
 
 
-	public static Mutex New()
+	public static ReadWriteLocked New()
 	{
 		return new Default();
 	}
 
 
-	public static class Default implements Mutex
+	public static class Default implements ReadWriteLocked
 	{
-		private final ReentrantReadWriteLock rrwLock = new ReentrantReadWriteLock();
+		private final ReentrantReadWriteLock mutex = new ReentrantReadWriteLock();
 
 		Default()
 		{
@@ -44,7 +44,7 @@ public interface Mutex
 		@Override
 		public <T> T read(final ValueOperation<T> op)
 		{
-			final ReadLock readLock = this.rrwLock.readLock();
+			final ReadLock readLock = this.mutex.readLock();
 			readLock.lock();
 
 			try
@@ -60,7 +60,7 @@ public interface Mutex
 		@Override
 		public void read(final VoidOperation op)
 		{
-			final ReadLock readLock = this.rrwLock.readLock();
+			final ReadLock readLock = this.mutex.readLock();
 			readLock.lock();
 
 			try
@@ -76,7 +76,7 @@ public interface Mutex
 		@Override
 		public <T> T write(final ValueOperation<T> op)
 		{
-			final WriteLock writeLock = this.rrwLock.writeLock();
+			final WriteLock writeLock = this.mutex.writeLock();
 			writeLock.lock();
 
 			try
@@ -92,7 +92,7 @@ public interface Mutex
 		@Override
 		public void write(final VoidOperation op)
 		{
-			final WriteLock writeLock = this.rrwLock.writeLock();
+			final WriteLock writeLock = this.mutex.writeLock();
 			writeLock.lock();
 
 			try
@@ -108,53 +108,53 @@ public interface Mutex
 	}
 
 
-	public static abstract class Owner implements Mutex
+	public static abstract class Scope implements ReadWriteLocked
 	{
-		private transient volatile Mutex mutex;
+		private transient volatile ReadWriteLocked delegate;
 
-		protected Owner()
+		protected Scope()
 		{
 			super();
 		}
 
-		protected Mutex mutex()
+		protected ReadWriteLocked delegate()
 		{
-			if(this.mutex == null)
+			if(this.delegate == null)
 			{
 				synchronized(this)
 				{
-					if(this.mutex == null)
+					if(this.delegate == null)
 					{
-						this.mutex = Mutex.New();
+						this.delegate = ReadWriteLocked.New();
 					}
 				}
 			}
 
-			return this.mutex;
+			return this.delegate;
 		}
 
 		@Override
 		public <T> T read(final ValueOperation<T> op)
 		{
-			return this.mutex().read(op);
+			return this.delegate().read(op);
 		}
 
 		@Override
 		public void read(final VoidOperation op)
 		{
-			this.mutex().read(op);
+			this.delegate().read(op);
 		}
 
 		@Override
 		public <T> T write(final ValueOperation<T> op)
 		{
-			return this.mutex().write(op);
+			return this.delegate().write(op);
 		}
 
 		@Override
 		public void write(final VoidOperation op)
 		{
-			this.mutex().write(op);
+			this.delegate().write(op);
 		}
 
 	}
