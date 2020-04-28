@@ -79,10 +79,10 @@ final class RandomDataGenerator implements HasLogger
 		}
 	}
 
-	private final Books.Mutable          books;
-	private final Shops.Mutable          shops;
-	private final Customers.Mutable      customers;
-	private final Purchases.Mutable      purchases;
+	private final Books.Default          books;
+	private final Shops.Default          shops;
+	private final Customers.Default      customers;
+	private final Purchases.Default      purchases;
 	private final RandomDataAmount       dataAmount;
 	private final EmbeddedStorageManager storageManager;
 	private final Random                 random;
@@ -91,10 +91,10 @@ final class RandomDataGenerator implements HasLogger
 	private final List<Book>             bookList;
 
 	RandomDataGenerator(
-		final Books.Mutable books,
-		final Shops.Mutable shops,
-		final Customers.Mutable customers,
-		final Purchases.Mutable purchases,
+		final Books.Default books,
+		final Shops.Default shops,
+		final Customers.Default customers,
+		final Purchases.Default purchases,
 		final RandomDataAmount dataAmount,
 		final EmbeddedStorageManager storageManager
 	)

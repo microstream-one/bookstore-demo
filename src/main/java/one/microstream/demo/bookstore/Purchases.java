@@ -59,24 +59,21 @@ public interface Purchases
 
 	public Employee employeeOfTheYear(int year, Country country);
 
+	public void add(Purchase purchase, StorageConnection storage);
 
-	public static interface Mutable extends Purchases
-	{
-		public void add(Purchase purchase, StorageConnection storage);
 
-		/*
-		 * used by random data generator
-		 */
-		public Set<Customer> init(int year, List<Purchase> purchases, StorageConnection storage);
-	}
-
-	public static class Default implements Purchases.Mutable
+	public static class Default extends HasMutex implements Purchases
 	{
 		static class YearlyPurchases
 		{
 			final Map<Shop,     Lazy<List<Purchase>>> shopToPurchases     = new HashMap<>(128);
 			final Map<Employee, Lazy<List<Purchase>>> employeeToPurchases = new HashMap<>(512);
 			final Map<Customer, Lazy<List<Purchase>>> customerToPurchases = new HashMap<>(1024);
+
+			YearlyPurchases()
+			{
+				super();
+			}
 
 			YearlyPurchases add(
 				final Purchase purchase
@@ -161,158 +158,186 @@ public interface Purchases
 		}
 
 		@Override
-		public synchronized void add(
+		public void add(
 			final Purchase purchase,
 			final StorageConnection storage
 		)
 		{
-			final Integer               year = purchase.timestamp().getYear();
-			final Lazy<YearlyPurchases> lazy = this.yearToPurchases.get(year);
-			if(lazy != null)
+			this.write(() ->
 			{
-				storage.store(lazy.get().add(purchase));
-			}
-			else
-			{
-				this.yearToPurchases.put(
-					year,
-					Lazy.Reference(
-						new YearlyPurchases().add(purchase)
-					)
-				);
-				storage.store(this.yearToPurchases);
-			}
+				final Integer               year = purchase.timestamp().getYear();
+				final Lazy<YearlyPurchases> lazy = this.yearToPurchases.get(year);
+				if(lazy != null)
+				{
+					storage.store(lazy.get().add(purchase));
+				}
+				else
+				{
+					this.yearToPurchases.put(
+						year,
+						Lazy.Reference(
+							new YearlyPurchases().add(purchase)
+						)
+					);
+					storage.store(this.yearToPurchases);
+				}
+			});
 		}
 
-		@Override
-		public synchronized Set<Customer> init(
+		Set<Customer> init(
 			final int year,
 			final List<Purchase> purchases,
 			final StorageConnection storage
 		)
 		{
-			final YearlyPurchases yearlyPurchases = new YearlyPurchases();
-			purchases.forEach(yearlyPurchases::add);
+			return this.write(() ->
+			{
+				final YearlyPurchases yearlyPurchases = new YearlyPurchases();
+				purchases.forEach(yearlyPurchases::add);
 
-			final Lazy<YearlyPurchases> lazy = Lazy.Reference(yearlyPurchases);
-			this.yearToPurchases.put(year, lazy);
+				final Lazy<YearlyPurchases> lazy = Lazy.Reference(yearlyPurchases);
+				this.yearToPurchases.put(year, lazy);
 
-			storage.store(this.yearToPurchases);
+				storage.store(this.yearToPurchases);
 
-			final Set<Customer> customers = new HashSet<>(yearlyPurchases.customerToPurchases.keySet());
+				final Set<Customer> customers = new HashSet<>(yearlyPurchases.customerToPurchases.keySet());
 
-			yearlyPurchases.clear();
-			lazy.clear();
+				yearlyPurchases.clear();
+				lazy.clear();
 
-			return customers;
+				return customers;
+			});
 		}
 
 		@Override
-		public synchronized void clear(
+		public void clear(
 			final int year
 		)
 		{
-			final Lazy<YearlyPurchases> lazy = this.yearToPurchases.get(year);
-			if(lazy != null && lazy.isStored())
+			this.write(() ->
 			{
-				Optional.ofNullable(lazy.clear()).ifPresent(YearlyPurchases::clear);
-			}
+				final Lazy<YearlyPurchases> lazy = this.yearToPurchases.get(year);
+				if(lazy != null && lazy.isStored())
+				{
+					Optional.ofNullable(lazy.clear()).ifPresent(YearlyPurchases::clear);
+				}
+			});
 		}
 
 		@Override
-		public synchronized IntStream years()
+		public IntStream years()
 		{
-			return this.yearToPurchases.keySet().stream()
-				.mapToInt(Integer::intValue)
-				.sorted();
-		}
-
-		@Override
-		public synchronized <T> T computeByYear(
-			final int year,
-			final Function<Stream<Purchase>, T> streamFunction
-		)
-		{
-			final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
-			return streamFunction.apply(
-				yearlyPurchases == null
-					? Stream.empty()
-					: yearlyPurchases.shopToPurchases.values().parallelStream()
-						.map(l -> l.get())
-						.flatMap(List::stream)
+			return this.read(() ->
+				this.yearToPurchases.keySet().stream()
+					.mapToInt(Integer::intValue)
+					.sorted()
 			);
 		}
 
 		@Override
-		public synchronized <T> T computeByShopAndYear(
+		public <T> T computeByYear(
+			final int year,
+			final Function<Stream<Purchase>, T> streamFunction
+		)
+		{
+			return this.read(() ->
+			{
+				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
+				return streamFunction.apply(
+					yearlyPurchases == null
+						? Stream.empty()
+						: yearlyPurchases.shopToPurchases.values().parallelStream()
+							.map(l -> l.get())
+							.flatMap(List::stream)
+				);
+			});
+		}
+
+		@Override
+		public <T> T computeByShopAndYear(
 			final Shop shop,
 			final int year,
 			final Function<Stream<Purchase>, T> streamFunction
 		)
 		{
-			final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
-			return streamFunction.apply(
-				yearlyPurchases == null
-					? Stream.empty()
-					: yearlyPurchases.byShop(shop)
-			);
+			return this.read(() ->
+			{
+				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
+				return streamFunction.apply(
+					yearlyPurchases == null
+						? Stream.empty()
+						: yearlyPurchases.byShop(shop)
+				);
+			});
 		}
 
 		@Override
-		public synchronized <T> T computeByShopsAndYear(
+		public <T> T computeByShopsAndYear(
 			final Predicate<Shop> shopSelector,
 			final int year,
 			final Function<Stream<Purchase>, T> streamFunction
 		)
 		{
-			final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
-			return streamFunction.apply(
-				yearlyPurchases == null
-					? Stream.empty()
-					: yearlyPurchases.byShops(shopSelector)
-			);
+			return this.read(() ->
+			{
+				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
+				return streamFunction.apply(
+					yearlyPurchases == null
+						? Stream.empty()
+						: yearlyPurchases.byShops(shopSelector)
+				);
+			});
 		}
 
 		@Override
-		public synchronized <T> T computeByEmployeeAndYear(
+		public <T> T computeByEmployeeAndYear(
 			final Employee employee,
 			final int year,
 			final Function<Stream<Purchase>, T> streamFunction
 		)
 		{
-			final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
-			return streamFunction.apply(
-				yearlyPurchases == null
-					? Stream.empty()
-					: yearlyPurchases.byEmployee(employee)
-			);
+			return this.read(() ->
+			{
+				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
+				return streamFunction.apply(
+					yearlyPurchases == null
+						? Stream.empty()
+						: yearlyPurchases.byEmployee(employee)
+				);
+			});
 		}
 
 		@Override
-		public synchronized <T> T computeByCustomerAndYear(
+		public <T> T computeByCustomerAndYear(
 			final Customer customer,
 			final int year,
 			final Function<Stream<Purchase>, T> streamFunction
 		)
 		{
-			final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
-			return streamFunction.apply(
-				yearlyPurchases == null
-					? Stream.empty()
-					: yearlyPurchases.byCustomer(customer)
+			return this.read(() ->
+			{
+				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
+				return streamFunction.apply(
+					yearlyPurchases == null
+						? Stream.empty()
+						: yearlyPurchases.byCustomer(customer)
+				);
+			});
+		}
+
+		@Override
+		public List<BookSales> bestSellerList(
+			final int year
+		)
+		{
+			return this.computeByYear(
+				year,
+				this::bestSellerList
 			);
 		}
 
 		@Override
-		public synchronized List<BookSales> bestSellerList(
-			final int year
-		)
-		{
-			return this.computeByYear(year, this::bestSellerList);
-		}
-
-		@Override
-		public synchronized List<BookSales> bestSellerList(
+		public List<BookSales> bestSellerList(
 			final int year,
 			final Country country
 		)

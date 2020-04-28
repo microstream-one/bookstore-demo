@@ -51,7 +51,8 @@ public class Commands
 
 	@Command(
 		name = "books",
-		description = "Prints the books found by the given query."
+		description = "Prints the books found by the given query.",
+		mixinStandardHelpOptions = true
 	)
 	static class Books extends Abstract
 	{
@@ -77,6 +78,7 @@ public class Commands
 			}
 			else
 			{
+				System.out.println(books.size() + " books found:");
 				books.stream().forEach(book ->
 				{
 					System.out.println(book.title() + "; by " + book.author().name());
@@ -88,7 +90,8 @@ public class Commands
 	@Command(
 		name = "bestSellerList",
 		aliases = {"bsl"},
-		description = "Prints the top ten best selling books of the given year."
+		description = "Prints the top ten best selling books of the given year.",
+		mixinStandardHelpOptions = true
 	)
 	static class BestSellerList extends Abstract
 	{
@@ -172,7 +175,8 @@ public class Commands
 	@Command(
 		name = "purchasesOfForeigners",
 		aliases = {"pof"},
-		description = "Prints the count of purchases of foreigners."
+		description = "Prints the count of purchases of foreigners.",
+		mixinStandardHelpOptions = true
 	)
 	static class PurchasesOfForeigners extends Abstract
 	{
@@ -230,7 +234,8 @@ public class Commands
 	@Command(
 		name = "employeeOfTheYear",
 		aliases = {"eoty"},
-		description = "Prints the best performing employee of a specific country or worldwide."
+		description = "Prints the best performing employee of a specific country or worldwide.",
+		mixinStandardHelpOptions = true
 	)
 	static class EmployeeOfTheYear extends Abstract
 	{
@@ -287,7 +292,9 @@ public class Commands
 
 	@Command(
 		name = "exit",
-		aliases = {"quit"}
+		aliases = {"quit"},
+		description = "Exits the program",
+		mixinStandardHelpOptions = true
 	)
 	static class Exit extends Abstract
 	{

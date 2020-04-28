@@ -14,15 +14,12 @@ public interface Customers
 
 	public <T> T compute(Function<Stream<Customer>, T> streamFunction);
 
+	public void add(Customer customer, StorageConnection storage);
 
-	public static interface Mutable extends Customers
-	{
-		public void add(Customer customer, StorageConnection storage);
+	public void addAll(Collection<? extends Customer> customers, StorageConnection storage);
 
-		public void addAll(Collection<? extends Customer> customers, StorageConnection storage);
-	}
 
-	public static class Default implements Customers.Mutable
+	public static class Default extends HasMutex implements Customers
 	{
 		private final List<Customer> customers = new ArrayList<>(1024);
 
@@ -34,37 +31,45 @@ public interface Customers
 		@Override
 		public synchronized int customerCount()
 		{
-			return this.customers.size();
-		}
-
-		@Override
-		public synchronized <T> T compute(
-			final Function<Stream<Customer>, T> streamFunction
-		)
-		{
-			return streamFunction.apply(
-				this.customers.parallelStream()
+			return this.read(
+				this.customers::size
 			);
 		}
 
 		@Override
-		public synchronized void add(
+		public <T> T compute(
+			final Function<Stream<Customer>, T> streamFunction
+		)
+		{
+			return this.read(() ->
+				streamFunction.apply(
+					this.customers.parallelStream()
+				)
+			);
+		}
+
+		@Override
+		public void add(
 			final Customer customer,
 			final StorageConnection storage
 		)
 		{
-			this.customers.add(customer);
-			storage.store(this.customers);
+			this.write(() -> {
+				this.customers.add(customer);
+				storage.store(this.customers);
+			});
 		}
 
 		@Override
-		public synchronized void addAll(
+		public void addAll(
 			final Collection<? extends Customer> customers,
 			final StorageConnection storage
 		)
 		{
-			this.customers.addAll(customers);
-			storage.store(this.customers);
+			this.write(() -> {
+				this.customers.addAll(customers);
+				storage.store(this.customers);
+			});
 		}
 
 	}

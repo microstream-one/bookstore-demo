@@ -16,15 +16,12 @@ public interface Shops
 
 	public <T> T compute(Function<Stream<Shop>, T> streamFunction);
 
+	public void add(Shop shop, StorageConnection storage);
 
-	public static interface Mutable extends Shops
-	{
-		public void add(Shop shop, StorageConnection storage);
+	public void addAll(Collection<? extends Shop> shops, StorageConnection storage);
 
-		public void addAll(Collection<? extends Shop> shops, StorageConnection storage);
-	}
 
-	public static class Default implements Shops.Mutable
+	public static class Default extends HasMutex implements Shops
 	{
 		private final List<Shop> shops = new ArrayList<>(1024);
 
@@ -34,45 +31,55 @@ public interface Shops
 		}
 
 		@Override
-		public synchronized int shopCount()
+		public int shopCount()
 		{
-			return this.shops.size();
-		}
-
-		@Override
-		public synchronized void clear()
-		{
-			this.shops.forEach(Shop::clear);
-		}
-
-		@Override
-		public synchronized <T> T compute(
-			final Function<Stream<Shop>, T> streamFunction
-		)
-		{
-			return streamFunction.apply(
-				this.shops.parallelStream()
+			return this.read(
+				this.shops::size
 			);
 		}
 
 		@Override
-		public synchronized void add(
+		public void clear()
+		{
+			this.write(() ->
+				this.shops.forEach(Shop::clear)
+			);
+		}
+
+		@Override
+		public <T> T compute(
+			final Function<Stream<Shop>, T> streamFunction
+		)
+		{
+			return this.read(() ->
+				streamFunction.apply(
+					this.shops.parallelStream()
+				)
+			);
+		}
+
+		@Override
+		public void add(
 			final Shop shop,
 			final StorageConnection storage
 		)
 		{
-			this.shops.add(shop);
-			storage.store(this.shops);
+			this.write(() -> {
+				this.shops.add(shop);
+				storage.store(this.shops);
+			});
 		}
 
 		@Override
-		public synchronized void addAll(
+		public void addAll(
 			final Collection<? extends Shop> shops,
 			final StorageConnection storage
 		)
 		{
-			this.shops.addAll(shops);
-			storage.store(this.shops);
+			this.write(() -> {
+				this.shops.addAll(shops);
+				storage.store(this.shops);
+			});
 		}
 
 	}

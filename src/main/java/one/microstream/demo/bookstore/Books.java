@@ -87,17 +87,14 @@ public interface Books
 		);
 	}
 
+	public void add(Book book);
 
-	public static interface Mutable extends Books
-	{
-		public void add(Book book);
+	public void addAll(Collection<? extends Book> books);
 
-		public void addAll(Collection<? extends Book> books);
+	public void clear();
 
-		public void clear();
-	}
 
-	public static class Default implements Books.Mutable
+	public static class Default extends HasMutex implements Books
 	{
 		private final Map<String, Book>          isbn13ToBook     = new HashMap<>(1024);
 		private final Map<Author, List<Book>>    authorToBooks    = new HashMap<>(512);
@@ -112,23 +109,29 @@ public interface Books
 		}
 
 		@Override
-		public synchronized void add(
+		public void add(
 			final Book book
 		)
 		{
-			this.index().add(book);
+			this.write(() ->
+			{
+				this.index().add(book);
 
-			this.addToCollections(book);
+				this.addToCollections(book);
+			});
 		}
 
 		@Override
-		public synchronized void addAll(
+		public void addAll(
 			final Collection<? extends Book> books
 		)
 		{
-			this.index().addAll(books);
+			this.write(() ->
+			{
+				this.index().addAll(books);
 
-			books.forEach(this::addToCollections);
+				books.forEach(this::addToCollections);
+			});
 		}
 
 		private void addToCollections(
@@ -156,125 +159,154 @@ public interface Books
 		}
 
 		@Override
-		public synchronized void clear()
+		public void clear()
 		{
-			this.isbn13ToBook.clear();
-			this.authorToBooks.clear();
-			this.genreToBooks.clear();
-			this.publisherToBooks.clear();
-			this.languageToBooks.clear();
+			this.write(() ->
+			{
+				this.isbn13ToBook.clear();
+				this.authorToBooks.clear();
+				this.genreToBooks.clear();
+				this.publisherToBooks.clear();
+				this.languageToBooks.clear();
 
-			this.index().clear();
+				this.index().clear();
+			});
 		}
 
 		@Override
-		public synchronized int bookCount()
+		public int bookCount()
 		{
-			return this.isbn13ToBook.size();
+			return this.read(
+				this.isbn13ToBook::size
+			);
 		}
 
 		@Override
-		public synchronized <T> T compute(
+		public <T> T compute(
 			final Function<Stream<Book>, T> streamFunction
 		)
 		{
-			return streamFunction.apply(this.isbn13ToBook.values().stream());
+			return this.read(() ->
+				streamFunction.apply(this.isbn13ToBook.values().stream())
+			);
 		}
 
 		@Override
-		public synchronized <T> T computeByAuthor(
+		public <T> T computeByAuthor(
 			final Author author,
 			final Function<Stream<Book>, T> streamFunction
 		)
 		{
-			final List<Book> list = this.authorToBooks.get(author);
-			return streamFunction.apply(
-				list != null
-					? list.stream()
-					: Stream.empty()
-			);
+			return this.read(() ->
+			{
+				final List<Book> list = this.authorToBooks.get(author);
+				return streamFunction.apply(
+					list != null
+						? list.stream()
+						: Stream.empty()
+				);
+			});
 		}
 
 		@Override
-		public synchronized <T> T computeByGenre(
+		public  <T> T computeByGenre(
 			final Genre genre,
 			final Function<Stream<Book>, T> streamFunction
 		)
 		{
-			final List<Book> list = this.genreToBooks.get(genre);
-			return streamFunction.apply(
-				list != null
-					? list.stream()
-					: Stream.empty()
-			);
+			return this.read(() ->
+			{
+				final List<Book> list = this.genreToBooks.get(genre);
+				return streamFunction.apply(
+					list != null
+						? list.stream()
+						: Stream.empty()
+				);
+			});
 		}
 
 		@Override
-		public synchronized <T> T computeByPublisher(
+		public <T> T computeByPublisher(
 			final Publisher publisher,
 			final Function<Stream<Book>, T> streamFunction
 		)
 		{
-			final List<Book> list = this.publisherToBooks.get(publisher);
-			return streamFunction.apply(
-				list != null
-					? list.stream()
-					: Stream.empty()
-			);
+			return this.read(() ->
+			{
+				final List<Book> list = this.publisherToBooks.get(publisher);
+				return streamFunction.apply(
+					list != null
+						? list.stream()
+						: Stream.empty()
+				);
+			});
 		}
 
 		@Override
-		public synchronized <T> T computeByLanguage(
+		public <T> T computeByLanguage(
 			final Language language,
 			final Function<Stream<Book>, T> streamFunction
 		)
 		{
-			final List<Book> list = this.languageToBooks.get(language);
-			return streamFunction.apply(
-				list != null
-					? list.stream()
-					: Stream.empty()
+			return this.read(() ->
+			{
+				final List<Book> list = this.languageToBooks.get(language);
+				return streamFunction.apply(
+					list != null
+						? list.stream()
+						: Stream.empty()
+				);
+			});
+		}
+
+		@Override
+		public Book ofIsbn13(
+			final String isbn13
+		)
+		{
+			return this.read(() ->
+				this.isbn13ToBook.get(isbn13)
 			);
 		}
 
 		@Override
-		public synchronized Book ofIsbn13(
-			final String isbn13
-		)
-		{
-			return this.isbn13ToBook.get(isbn13);
-		}
-
-		@Override
-		public synchronized <T> T computeGenres(
+		public <T> T computeGenres(
 			final Function<Stream<Genre>, T> streamFunction
 		)
 		{
-			return streamFunction.apply(this.genreToBooks.keySet().stream());
+			return this.read(() ->
+				streamFunction.apply(this.genreToBooks.keySet().stream())
+			);
 		}
 
 		@Override
-		public synchronized <T> T computeAuthors(
+		public <T> T computeAuthors(
 			final Function<Stream<Author>, T> streamFunction
 		)
 		{
-			return streamFunction.apply(this.authorToBooks.keySet().stream());
+			return this.read(() ->
+				streamFunction.apply(this.authorToBooks.keySet().stream())
+			);
 		}
 
 		@Override
-		public synchronized <T> T computePublishers(
+		public <T> T computePublishers(
 			final Function<Stream<Publisher>, T> streamFunction
 		)
 		{
-			return streamFunction.apply(this.publisherToBooks.keySet().stream());
+			return this.read(() ->
+				streamFunction.apply(this.publisherToBooks.keySet().stream())
+			);
 		}
 
 		@Override
-		public synchronized <T> T computeLanguages(
+		public <T> T computeLanguages(
 			final Function<Stream<Language>, T> streamFunction
 		)
 		{
-			return streamFunction.apply(this.languageToBooks.keySet().stream());
+			return this.read(() ->
+				streamFunction.apply(this.languageToBooks.keySet().stream())
+			);
 		}
 
 		@Override
@@ -292,7 +324,13 @@ public interface Books
 		{
 			if(this.index == null)
 			{
-				this.index = this.createIndex();
+				synchronized(this)
+				{
+					if(this.index == null)
+					{
+						this.index = this.createIndex();
+					}
+				}
 			}
 			return this.index;
 		}

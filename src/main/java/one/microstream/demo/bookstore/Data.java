@@ -26,10 +26,10 @@ public interface Data
 
 	public static class Default implements Data.Mutable
 	{
-		private final Books.Mutable     books     = new Books.Default();
-		private final Shops.Mutable     shops     = new Shops.Default();
-		private final Customers.Mutable customers = new Customers.Default();
-		private final Purchases.Mutable purchases = new Purchases.Default();
+		private final Books.Default     books     = new Books.Default();
+		private final Shops.Default     shops     = new Shops.Default();
+		private final Customers.Default customers = new Customers.Default();
+		private final Purchases.Default purchases = new Purchases.Default();
 
 		Default()
 		{
