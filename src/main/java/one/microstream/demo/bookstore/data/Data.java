@@ -63,7 +63,7 @@ public interface Data
 			final EmbeddedStorageManager storageManager
 		)
 		{
-			final DataMetrics metrics = new RandomDataGenerator(
+			return RandomDataGenerator.New(
 				this.books,
 				this.shops,
 				this.customers,
@@ -72,10 +72,6 @@ public interface Data
 				storageManager
 			)
 			.generate();
-
-			System.gc();
-
-			return metrics;
 		}
 
 	}
