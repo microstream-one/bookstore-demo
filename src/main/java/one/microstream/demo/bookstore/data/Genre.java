@@ -1,5 +1,5 @@
 
-package one.microstream.demo.bookstore;
+package one.microstream.demo.bookstore.data;
 
 public interface Genre extends Named
 {

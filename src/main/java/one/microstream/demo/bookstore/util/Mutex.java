@@ -1,4 +1,4 @@
-package one.microstream.demo.bookstore;
+package one.microstream.demo.bookstore.util;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;

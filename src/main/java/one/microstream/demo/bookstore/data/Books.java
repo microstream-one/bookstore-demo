@@ -1,5 +1,5 @@
 
-package one.microstream.demo.bookstore;
+package one.microstream.demo.bookstore.data;
 
 import static java.util.stream.Collectors.toList;
 
@@ -17,8 +17,9 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.QueryBuilder;
 
-import one.microstream.demo.bookstore.Index.DocumentPopulator;
-import one.microstream.demo.bookstore.Index.EntityMatcher;
+import one.microstream.demo.bookstore.data.Index.DocumentPopulator;
+import one.microstream.demo.bookstore.data.Index.EntityMatcher;
+import one.microstream.demo.bookstore.util.HasMutex;
 
 
 public interface Books

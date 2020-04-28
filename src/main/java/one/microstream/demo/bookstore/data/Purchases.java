@@ -1,5 +1,5 @@
 
-package one.microstream.demo.bookstore;
+package one.microstream.demo.bookstore.data;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.summingDouble;
@@ -18,7 +18,8 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import one.microstream.demo.bookstore.Purchase.Item;
+import one.microstream.demo.bookstore.data.Purchase.Item;
+import one.microstream.demo.bookstore.util.HasMutex;
 import one.microstream.reference.Lazy;
 import one.microstream.storage.types.StorageConnection;
 

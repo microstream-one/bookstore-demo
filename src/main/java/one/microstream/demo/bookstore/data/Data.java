@@ -1,5 +1,5 @@
 
-package one.microstream.demo.bookstore;
+package one.microstream.demo.bookstore.data;
 
 import one.microstream.storage.types.EmbeddedStorageManager;
 
@@ -15,16 +15,13 @@ public interface Data
 	public Purchases purchases();
 
 
-	public static interface Mutable extends Data
+	public static Data.Default New()
 	{
-		public DataMetrics populate(
-			final RandomDataAmount initialDataSize,
-			final EmbeddedStorageManager storageManager
-		);
+		return new Default();
 	}
 
 
-	public static class Default implements Data.Mutable
+	public static class Default implements Data
 	{
 		private final Books.Default     books     = new Books.Default();
 		private final Shops.Default     shops     = new Shops.Default();
@@ -60,7 +57,7 @@ public interface Data
 			return this.purchases;
 		}
 
-		@Override
+
 		public DataMetrics populate(
 			final RandomDataAmount initialDataSize,
 			final EmbeddedStorageManager storageManager

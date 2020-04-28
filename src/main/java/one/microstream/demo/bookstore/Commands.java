@@ -3,6 +3,11 @@ package one.microstream.demo.bookstore;
 import java.time.Year;
 import java.util.List;
 
+import one.microstream.demo.bookstore.data.Book;
+import one.microstream.demo.bookstore.data.BookSales;
+import one.microstream.demo.bookstore.data.Country;
+import one.microstream.demo.bookstore.data.Data;
+import one.microstream.demo.bookstore.data.Employee;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;

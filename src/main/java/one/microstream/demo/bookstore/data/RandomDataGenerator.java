@@ -1,4 +1,4 @@
-package one.microstream.demo.bookstore;
+package one.microstream.demo.bookstore.data;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;

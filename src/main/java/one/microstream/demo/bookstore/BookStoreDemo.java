@@ -5,6 +5,9 @@ import java.nio.file.Paths;
 
 import org.rapidpm.dependencies.core.logger.HasLogger;
 
+import one.microstream.demo.bookstore.data.Data;
+import one.microstream.demo.bookstore.data.DataMetrics;
+import one.microstream.demo.bookstore.data.RandomDataAmount;
 import one.microstream.jdk8.java.util.BinaryHandlersJDK8;
 import one.microstream.storage.configuration.Configuration;
 import one.microstream.storage.types.EmbeddedStorageFoundation;
@@ -40,7 +43,7 @@ public final class BookStoreDemo implements HasLogger
 			{
 				this.logger().info("No data found, initializing random data");
 
-				final Data.Mutable data = new Data.Default();
+				final Data.Default data = Data.New();
 				this.storageManager.setRoot(data);
 				this.storageManager.storeRoot();
 				final DataMetrics metrics = data.populate(

@@ -1,4 +1,4 @@
-package one.microstream.demo.bookstore;
+package one.microstream.demo.bookstore.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import one.microstream.demo.bookstore.util.HasMutex;
 import one.microstream.storage.types.StorageConnection;
 
 public interface Customers
