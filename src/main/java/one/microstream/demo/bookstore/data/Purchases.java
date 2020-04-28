@@ -4,6 +4,8 @@ package one.microstream.demo.bookstore.data;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.summingInt;
 import static java.util.stream.Collectors.toList;
+import static one.microstream.demo.bookstore.util.CollectionUtils.ensureParallelStream;
+import static one.microstream.demo.bookstore.util.CollectionUtils.maxKey;
 import static one.microstream.demo.bookstore.util.CollectionUtils.summingMonetaryAmount;
 import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetary;
 
@@ -87,13 +89,13 @@ public interface Purchases
 				final Purchase purchase
 			)
 			{
-				this.internalAdd(this.shopToPurchases,     purchase.shop(),     purchase);
-				this.internalAdd(this.employeeToPurchases, purchase.employee(), purchase);
-				this.internalAdd(this.customerToPurchases, purchase.customer(), purchase);
+				addToMap(this.shopToPurchases,     purchase.shop(),     purchase);
+				addToMap(this.employeeToPurchases, purchase.employee(), purchase);
+				addToMap(this.customerToPurchases, purchase.customer(), purchase);
 				return this;
 			}
 
-			private <K> void internalAdd(
+			private static <K> void addToMap(
 				final Map<K, Lazy<List<Purchase>>> map,
 				final K key,
 				final Purchase purchase
@@ -106,19 +108,27 @@ public interface Purchases
 
 			void clear()
 			{
-				this.shopToPurchases    .values().forEach(l -> Optional.ofNullable(l.clear()).ifPresent(List::clear));
-				this.employeeToPurchases.values().forEach(l -> Optional.ofNullable(l.clear()).ifPresent(List::clear));
-				this.customerToPurchases.values().forEach(l -> Optional.ofNullable(l.clear()).ifPresent(List::clear));
+				clearMap(this.shopToPurchases);
+				clearMap(this.employeeToPurchases);
+				clearMap(this.customerToPurchases);
+			}
+
+			private static <K> void clearMap(
+				final Map<K, Lazy<List<Purchase>>> map
+			)
+			{
+				map.values().forEach(lazy ->
+					Optional.ofNullable(lazy.clear()).ifPresent(List::clear)
+				);
 			}
 
 			Stream<Purchase> byShop(
 				final Shop shop
 			)
 			{
-				final List<Purchase> list = Lazy.get(this.shopToPurchases.get(shop));
-				return list == null
-					? Stream.empty()
-					: list.parallelStream();
+				return ensureParallelStream(
+					Lazy.get(this.shopToPurchases.get(shop))
+				);
 			}
 
 			Stream<Purchase> byShops(
@@ -127,38 +137,31 @@ public interface Purchases
 			{
 				return this.shopToPurchases.entrySet().parallelStream()
 					.filter(e -> shopSelector.test(e.getKey()))
-					.flatMap(e -> {
-						final List<Purchase> list = Lazy.get(e.getValue());
-						return list == null
-							? Stream.empty()
-							: list.stream();
-					});
+					.flatMap(e -> ensureParallelStream(Lazy.get(e.getValue())));
 			}
 
 			Stream<Purchase> byEmployee(
 				final Employee employee
 			)
 			{
-				final List<Purchase> list = Lazy.get(this.employeeToPurchases.get(employee));
-				return list == null
-					? Stream.empty()
-					: list.parallelStream();
+				return ensureParallelStream(
+					Lazy.get(this.employeeToPurchases.get(employee))
+				);
 			}
 
 			Stream<Purchase> byCustomer(
 				final Customer customer
 			)
 			{
-				final List<Purchase> list = Lazy.get(this.customerToPurchases.get(customer));
-				return list == null
-					? Stream.empty()
-					: list.parallelStream();
+				return ensureParallelStream(
+					Lazy.get(this.customerToPurchases.get(customer))
+				);
 			}
 
 		}
 
 
-		private final Map<Integer, Lazy<YearlyPurchases>> yearToPurchases = new ConcurrentHashMap<>(32);
+		private final Map<Integer, Lazy<YearlyPurchases>> yearlyPurchases = new ConcurrentHashMap<>(32);
 
 		Default()
 		{
@@ -174,20 +177,20 @@ public interface Purchases
 			final Integer year = purchase.timestamp().getYear();
 			this.write(year, () ->
 			{
-				final Lazy<YearlyPurchases> lazy = this.yearToPurchases.get(year);
+				final Lazy<YearlyPurchases> lazy = this.yearlyPurchases.get(year);
 				if(lazy != null)
 				{
 					storage.store(lazy.get().add(purchase));
 				}
 				else
 				{
-					this.yearToPurchases.put(
+					this.yearlyPurchases.put(
 						year,
 						Lazy.Reference(
 							new YearlyPurchases().add(purchase)
 						)
 					);
-					storage.store(this.yearToPurchases);
+					storage.store(this.yearlyPurchases);
 				}
 			});
 		}
@@ -204,9 +207,9 @@ public interface Purchases
 				purchases.forEach(yearlyPurchases::add);
 
 				final Lazy<YearlyPurchases> lazy = Lazy.Reference(yearlyPurchases);
-				this.yearToPurchases.put(year, lazy);
+				this.yearlyPurchases.put(year, lazy);
 
-				storage.store(this.yearToPurchases);
+				storage.store(this.yearlyPurchases);
 
 				final Set<Customer> customers = new HashSet<>(yearlyPurchases.customerToPurchases.keySet());
 
@@ -224,7 +227,7 @@ public interface Purchases
 		{
 			this.write(year, () ->
 			{
-				final Lazy<YearlyPurchases> lazy = this.yearToPurchases.get(year);
+				final Lazy<YearlyPurchases> lazy = this.yearlyPurchases.get(year);
 				if(lazy != null && lazy.isStored())
 				{
 					Optional.ofNullable(lazy.clear()).ifPresent(YearlyPurchases::clear);
@@ -235,7 +238,7 @@ public interface Purchases
 		@Override
 		public Range<Integer> years()
 		{
-			final IntSummaryStatistics summary = this.yearToPurchases.keySet().stream()
+			final IntSummaryStatistics summary = this.yearlyPurchases.keySet().stream()
 				.mapToInt(Integer::intValue)
 				.summaryStatistics();
 			return Range.closed(summary.getMin(), summary.getMax());
@@ -249,7 +252,7 @@ public interface Purchases
 		{
 			return this.read(year, () ->
 			{
-				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
+				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearlyPurchases.get(year));
 				return streamFunction.apply(
 					yearlyPurchases == null
 						? Stream.empty()
@@ -269,7 +272,7 @@ public interface Purchases
 		{
 			return this.read(year, () ->
 			{
-				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
+				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearlyPurchases.get(year));
 				return streamFunction.apply(
 					yearlyPurchases == null
 						? Stream.empty()
@@ -287,7 +290,7 @@ public interface Purchases
 		{
 			return this.read(year, () ->
 			{
-				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
+				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearlyPurchases.get(year));
 				return streamFunction.apply(
 					yearlyPurchases == null
 						? Stream.empty()
@@ -305,7 +308,7 @@ public interface Purchases
 		{
 			return this.read(year, () ->
 			{
-				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
+				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearlyPurchases.get(year));
 				return streamFunction.apply(
 					yearlyPurchases == null
 						? Stream.empty()
@@ -323,7 +326,7 @@ public interface Purchases
 		{
 			return this.read(year, () ->
 			{
-				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearToPurchases.get(year));
+				final YearlyPurchases yearlyPurchases = Lazy.get(this.yearlyPurchases.get(year));
 				return streamFunction.apply(
 					yearlyPurchases == null
 						? Stream.empty()
@@ -518,17 +521,6 @@ public interface Purchases
 					)
 				)
 			);
-		}
-
-		private static <K, V extends Comparable<V>> K maxKey(
-			final Map<K, V> map
-		)
-		{
-			return map.entrySet()
-				.parallelStream()
-				.max((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
-				.get()
-				.getKey();
 		}
 
 	}
