@@ -23,7 +23,7 @@ import javax.money.MonetaryAmount;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Purchase.Item;
-import one.microstream.demo.bookstore.util.HasMutex;
+import one.microstream.demo.bookstore.util.Mutex;
 import one.microstream.reference.Lazy;
 import one.microstream.storage.types.StorageConnection;
 
@@ -67,7 +67,7 @@ public interface Purchases
 	public void add(Purchase purchase, StorageConnection storage);
 
 
-	public static class Default extends HasMutex implements Purchases
+	public static class Default extends Mutex.Owner implements Purchases
 	{
 		static class YearlyPurchases
 		{

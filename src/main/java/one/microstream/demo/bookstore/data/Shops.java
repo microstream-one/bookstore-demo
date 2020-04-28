@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import one.microstream.demo.bookstore.util.HasMutex;
+import one.microstream.demo.bookstore.util.Mutex;
 import one.microstream.storage.types.StorageConnection;
 
 public interface Shops
@@ -22,7 +22,7 @@ public interface Shops
 	public void addAll(Collection<? extends Shop> shops, StorageConnection storage);
 
 
-	public static class Default extends HasMutex implements Shops
+	public static class Default extends Mutex.Owner implements Shops
 	{
 		private final List<Shop> shops = new ArrayList<>(1024);
 
