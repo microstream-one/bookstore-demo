@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import javax.money.MonetaryAmount;
+
 
 public interface Purchase extends Entity
 {
@@ -13,11 +15,12 @@ public interface Purchase extends Entity
 	{
 		public Book book();
 
-		public double bookPrice();
-
 		public int amount();
 
-		public double itemTotal();
+		public MonetaryAmount price();
+
+		public MonetaryAmount itemTotal();
+
 
 		public static Item New(
 			final Book book,
@@ -27,11 +30,12 @@ public interface Purchase extends Entity
 			return new Default(book, amount);
 		}
 
+
 		public static class Default implements Item
 		{
-			private final Book   book;
-			private final double bookPrice;
-			private final int    amount;
+			private final Book           book;
+			private final int            amount;
+			private final MonetaryAmount price;
 
 			Default(
 				final Book book,
@@ -39,9 +43,9 @@ public interface Purchase extends Entity
 			)
 			{
 				super();
-				this.book      = book;
-				this.bookPrice = book.price();
-				this.amount    = amount;
+				this.book   = book;
+				this.amount = amount;
+				this.price  = book.retailPrice();
 			}
 
 			@Override
@@ -51,21 +55,21 @@ public interface Purchase extends Entity
 			}
 
 			@Override
-			public double bookPrice()
-			{
-				return this.bookPrice;
-			}
-
-			@Override
 			public int amount()
 			{
 				return this.amount;
 			}
 
 			@Override
-			public double itemTotal()
+			public MonetaryAmount price()
 			{
-				return this.amount * this.bookPrice;
+				return this.price;
+			}
+
+			@Override
+			public MonetaryAmount itemTotal()
+			{
+				return this.price.multiply(this.amount);
 			}
 
 		}
@@ -84,7 +88,8 @@ public interface Purchase extends Entity
 
 	public int itemCount();
 
-	public double total();
+	public MonetaryAmount total();
+
 
 	public static Purchase New(
 		final Shop shop,
@@ -97,14 +102,15 @@ public interface Purchase extends Entity
 		return new Default(shop, employee, customer, timestamp, items.toArray(new Item[items.size()]));
 	}
 
+
 	public static class Default implements Purchase
 	{
-		private final Shop          shop;
-		private final Employee      employee;
-		private final Customer      customer;
-		private final LocalDateTime timestamp;
-		private final Item[]        items;
-		private transient double    total;
+		private final Shop               shop;
+		private final Employee           employee;
+		private final Customer           customer;
+		private final LocalDateTime      timestamp;
+		private final Item[]             items;
+		private transient MonetaryAmount total;
 
 		Default(
 			final Shop shop,
@@ -159,14 +165,16 @@ public interface Purchase extends Entity
 		}
 
 		@Override
-		public double total()
+		public MonetaryAmount total()
 		{
-			if(this.total <= 0.0)
+			if(this.total  == null)
 			{
-				double total = 0.0;
+				MonetaryAmount total = null;
 				for(final Item item : this.items)
 				{
-					total += item.itemTotal();
+					total = total == null
+						? item.itemTotal()
+						: total.add(item.itemTotal());
 				}
 				this.total = total;
 			}

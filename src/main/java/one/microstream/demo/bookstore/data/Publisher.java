@@ -10,7 +10,8 @@ public interface Publisher extends NamedWithAddress
 	{
 		return new Default(name, address);
 	}
-	
+
+
 	public static class Default extends NamedWithAddress.Abstract implements Publisher
 	{
 		public Default(
@@ -20,7 +21,7 @@ public interface Publisher extends NamedWithAddress
 		{
 			super(name, address);
 		}
-		
+
 	}
-	
+
 }

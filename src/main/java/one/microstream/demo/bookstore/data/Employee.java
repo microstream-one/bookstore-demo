@@ -10,7 +10,8 @@ public interface Employee extends NamedWithAddress
 	{
 		return new Default(name, address);
 	}
-	
+
+
 	public static class Default extends NamedWithAddress.Abstract implements Employee
 	{
 		public Default(
@@ -20,7 +21,7 @@ public interface Employee extends NamedWithAddress
 		{
 			super(name, address);
 		}
-		
+
 	}
-	
+
 }

@@ -1,43 +1,62 @@
 
 package one.microstream.demo.bookstore.data;
 
-public class BookSales implements Comparable<BookSales>
+public interface BookSales extends Comparable<BookSales>
 {
-	private final Book book;
-	private final int  amount;
+	public Book book();
 
-	public BookSales(
+	public int amount();
+
+
+	public static BookSales New(
 		final Book book,
 		final int amount
 	)
 	{
-		super();
-		this.book   = book;
-		this.amount = amount;
+		return new Default(book, amount);
 	}
 
-	public Book book()
+	public static class Default implements BookSales
 	{
-		return this.book;
-	}
+		private final Book book;
+		private final int  amount;
 
-	public int amount()
-	{
-		return this.amount;
-	}
+		Default(
+			final Book book,
+			final int amount
+		)
+		{
+			super();
+			this.book   = book;
+			this.amount = amount;
+		}
 
-	@Override
-	public int compareTo(
-		final BookSales other
-	)
-	{
-		return Integer.compare(other.amount, this.amount);
-	}
+		@Override
+		public Book book()
+		{
+			return this.book;
+		}
 
-	@Override
-	public String toString()
-	{
-		return "BookSales [book=" + this.book + ", amount=" + this.amount + "]";
+		@Override
+		public int amount()
+		{
+			return this.amount;
+		}
+
+		@Override
+		public int compareTo(
+			final BookSales other
+		)
+		{
+			return Integer.compare(other.amount(), this.amount);
+		}
+
+		@Override
+		public String toString()
+		{
+			return "BookSales [book=" + this.book + ", amount=" + this.amount + "]";
+		}
+
 	}
 
 }

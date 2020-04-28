@@ -29,7 +29,6 @@ public class Repl implements Runnable
 {
 	private final BookStoreDemo bookStoreDemo;
 
-
 	public Repl(final BookStoreDemo bookStoreDemo)
 	{
 		this.bookStoreDemo = bookStoreDemo;
@@ -142,4 +141,5 @@ public class Repl implements Runnable
 			return null;
 		}
 	}
+
 }

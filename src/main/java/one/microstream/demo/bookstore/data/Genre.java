@@ -9,7 +9,8 @@ public interface Genre extends Named
 	{
 		return new Default(name);
 	}
-	
+
+
 	public static class Default extends Named.Abstract implements Genre
 	{
 		Default(
@@ -18,7 +19,7 @@ public interface Genre extends Named
 		{
 			super(name);
 		}
-		
+
 	}
-	
+
 }

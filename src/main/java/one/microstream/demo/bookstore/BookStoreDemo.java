@@ -2,6 +2,10 @@
 package one.microstream.demo.bookstore;
 
 import java.nio.file.Paths;
+import java.util.Locale;
+
+import javax.money.CurrencyUnit;
+import javax.money.Monetary;
 
 import org.rapidpm.dependencies.core.logger.HasLogger;
 
@@ -16,6 +20,12 @@ import one.microstream.storage.types.EmbeddedStorageManager;
 
 public final class BookStoreDemo implements HasLogger
 {
+	public static CurrencyUnit currencyUnit()
+	{
+		return Monetary.getCurrency(Locale.US);
+	}
+
+
 	private final RandomDataAmount initialDataAmount;
 	private EmbeddedStorageManager storageManager;
 

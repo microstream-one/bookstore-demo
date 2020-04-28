@@ -10,7 +10,8 @@ public interface Country extends NamedWithCode
 	{
 		return new Default(name, code);
 	}
-	
+
+
 	public static class Default extends NamedWithCode.Abstract implements Country
 	{
 		Default(
@@ -20,7 +21,7 @@ public interface Country extends NamedWithCode
 		{
 			super(name, code);
 		}
-		
+
 	}
-	
+
 }

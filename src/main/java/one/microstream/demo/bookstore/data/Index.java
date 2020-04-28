@@ -50,6 +50,7 @@ public interface Index<T> extends Closeable
 
 	public int size();
 
+
 	public static <T> Index<T> New(
 		final Class<T> entityType,
 		final DocumentPopulator<T> documentPopulator,
@@ -62,6 +63,7 @@ public interface Index<T> extends Closeable
 			entityMatcher
 		);
 	}
+
 
 	public static class Default<T> implements Index<T>
 	{

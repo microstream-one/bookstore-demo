@@ -2,9 +2,10 @@
 package one.microstream.demo.bookstore.data;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.summingDouble;
 import static java.util.stream.Collectors.summingInt;
 import static java.util.stream.Collectors.toList;
+import static one.microstream.demo.bookstore.util.CollectionUtils.summingMonetaryAmount;
+import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetary;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +19,9 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import javax.money.MonetaryAmount;
+
+import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Purchase.Item;
 import one.microstream.demo.bookstore.util.HasMutex;
 import one.microstream.reference.Lazy;
@@ -54,7 +58,7 @@ public interface Purchases
 
 	public List<Purchase> purchasesOfForeigners(int year, Country country);
 
-	public double revenueOfShopInYear(Shop shop, int year);
+	public MonetaryAmount revenueOfShopInYear(Shop shop, int year);
 
 	public Employee employeeOfTheYear(int year);
 
@@ -364,7 +368,7 @@ public interface Purchases
 				)
 				.entrySet()
 				.stream()
-				.map(e -> new BookSales(e.getKey(), e.getValue()))
+				.map(e -> BookSales.New(e.getKey(), e.getValue()))
 				.sorted()
 				.collect(toList());
 		}
@@ -460,7 +464,7 @@ public interface Purchases
 		}
 
 		@Override
-		public double revenueOfShopInYear(
+		public MonetaryAmount revenueOfShopInYear(
 			final Shop shop,
 			final int year
 		)
@@ -469,8 +473,9 @@ public interface Purchases
 				shop,
 				year,
 				purchases -> purchases
-					.mapToDouble(Purchase::total)
-					.sum()
+					.map(Purchase::total)
+					.collect(summarizingMonetary(BookStoreDemo.currencyUnit()))
+					.getSum()
 			);
 		}
 
@@ -504,14 +509,17 @@ public interface Purchases
 				purchases.collect(
 					groupingBy(
 						Purchase::employee,
-						summingDouble(Purchase::total)
+						summingMonetaryAmount(
+							BookStoreDemo.currencyUnit(),
+							Purchase::total
+						)
 					)
 				)
 			);
 		}
 
-		private static <K> K maxKey(
-			final Map<K, Double> map
+		private static <K, V extends Comparable<V>> K maxKey(
+			final Map<K, V> map
 		)
 		{
 			return map.entrySet()
