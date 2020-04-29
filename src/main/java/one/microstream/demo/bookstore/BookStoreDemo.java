@@ -1,12 +1,15 @@
 
 package one.microstream.demo.bookstore;
 
+import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.Locale;
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
+import javax.money.MonetaryAmount;
 
+import org.javamoney.moneta.Money;
 import org.rapidpm.dependencies.core.logger.HasLogger;
 
 import one.microstream.demo.bookstore.data.Data;
@@ -23,6 +26,23 @@ public final class BookStoreDemo implements HasLogger
 	public static CurrencyUnit currencyUnit()
 	{
 		return Monetary.getCurrency(Locale.US);
+	}
+
+	public static MonetaryAmount money(final double number)
+	{
+		return Money.of(number, currencyUnit());
+	}
+
+	public static MonetaryAmount money(final BigDecimal number)
+	{
+		return Money.of(number, currencyUnit());
+	}
+
+	public static MonetaryAmount retailPrice(
+		final MonetaryAmount purchasePrice
+	)
+	{
+		return purchasePrice.multiply(1.11);
 	}
 
 

@@ -20,10 +20,27 @@ import org.apache.lucene.util.QueryBuilder;
 import one.microstream.demo.bookstore.data.Index.DocumentPopulator;
 import one.microstream.demo.bookstore.data.Index.EntityMatcher;
 import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
+import one.microstream.storage.types.StorageConnection;
 
 
 public interface Books
 {
+	public void add(Book book, StorageConnection storage);
+
+	public void addAll(Collection<? extends Book> books, StorageConnection storage);
+
+	public void clear();
+
+	public List<Book> all();
+
+	public List<Author> authors();
+
+	public List<Genre> genres();
+
+	public List<Publisher> publishers();
+
+	public List<Language> languages();
+
 	public int bookCount();
 
 	public <T> T compute(Function<Stream<Book>, T> streamFunction);
@@ -88,12 +105,6 @@ public interface Books
 		);
 	}
 
-	public void add(Book book);
-
-	public void addAll(Collection<? extends Book> books);
-
-	public void clear();
-
 
 	public static class Default extends ReadWriteLocked.Scope implements Books
 	{
@@ -111,27 +122,29 @@ public interface Books
 
 		@Override
 		public void add(
-			final Book book
+			final Book book,
+			final StorageConnection storage
 		)
 		{
 			this.write(() ->
 			{
 				this.index().add(book);
-
 				this.addToCollections(book);
+				this.storeCollections(storage);
 			});
 		}
 
 		@Override
 		public void addAll(
-			final Collection<? extends Book> books
+			final Collection<? extends Book> books,
+			final StorageConnection storage
 		)
 		{
 			this.write(() ->
 			{
 				this.index().addAll(books);
-
 				books.forEach(this::addToCollections);
+				this.storeCollections(storage);
 			});
 		}
 
@@ -159,6 +172,17 @@ public interface Books
 			.add(book);
 		}
 
+		private void storeCollections(final StorageConnection storage)
+		{
+			storage.storeAll(
+				this.isbn13ToBook,
+				this.authorToBooks,
+				this.genreToBooks,
+				this.publisherToBooks,
+				this.languageToBooks
+			);
+		}
+
 		@Override
 		public void clear()
 		{
@@ -172,6 +196,51 @@ public interface Books
 
 				this.index().clear();
 			});
+		}
+
+		@Override
+		public List<Book> all()
+		{
+			return this.read(() ->
+				this.isbn13ToBook.values().stream()
+					.collect(toList())
+			);
+		}
+
+		@Override
+		public List<Author> authors()
+		{
+			return this.read(() ->
+				this.authorToBooks.keySet().stream()
+					.collect(toList())
+			);
+		}
+
+		@Override
+		public List<Genre> genres()
+		{
+			return this.read(() ->
+				this.genreToBooks.keySet().stream()
+					.collect(toList())
+			);
+		}
+
+		@Override
+		public List<Publisher> publishers()
+		{
+			return this.read(() ->
+				this.publisherToBooks.keySet().stream()
+					.collect(toList())
+			);
+		}
+
+		@Override
+		public List<Language> languages()
+		{
+			return this.read(() ->
+				this.languageToBooks.keySet().stream()
+					.collect(toList())
+			);
 		}
 
 		@Override

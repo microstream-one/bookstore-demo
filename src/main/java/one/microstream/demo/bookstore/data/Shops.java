@@ -11,15 +11,15 @@ import one.microstream.storage.types.StorageConnection;
 
 public interface Shops
 {
+	public void add(Shop shop, StorageConnection storage);
+
+	public void addAll(Collection<? extends Shop> shops, StorageConnection storage);
+
 	public int shopCount();
 
 	public void clear();
 
 	public <T> T compute(Function<Stream<Shop>, T> streamFunction);
-
-	public void add(Shop shop, StorageConnection storage);
-
-	public void addAll(Collection<? extends Shop> shops, StorageConnection storage);
 
 
 	public static class Default extends ReadWriteLocked.Scope implements Shops
@@ -29,6 +29,30 @@ public interface Shops
 		Default()
 		{
 			super();
+		}
+
+		@Override
+		public void add(
+			final Shop shop,
+			final StorageConnection storage
+		)
+		{
+			this.write(() -> {
+				this.shops.add(shop);
+				storage.store(this.shops);
+			});
+		}
+
+		@Override
+		public void addAll(
+			final Collection<? extends Shop> shops,
+			final StorageConnection storage
+		)
+		{
+			this.write(() -> {
+				this.shops.addAll(shops);
+				storage.store(this.shops);
+			});
 		}
 
 		@Override
@@ -57,30 +81,6 @@ public interface Shops
 					this.shops.parallelStream()
 				)
 			);
-		}
-
-		@Override
-		public void add(
-			final Shop shop,
-			final StorageConnection storage
-		)
-		{
-			this.write(() -> {
-				this.shops.add(shop);
-				storage.store(this.shops);
-			});
-		}
-
-		@Override
-		public void addAll(
-			final Collection<? extends Shop> shops,
-			final StorageConnection storage
-		)
-		{
-			this.write(() -> {
-				this.shops.addAll(shops);
-				storage.store(this.shops);
-			});
 		}
 
 	}

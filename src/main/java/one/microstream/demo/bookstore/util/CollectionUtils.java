@@ -2,6 +2,7 @@ package one.microstream.demo.bookstore.util;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
@@ -13,7 +14,7 @@ import org.javamoney.moneta.function.DefaultMonetarySummaryStatistics;
 import org.javamoney.moneta.function.MonetarySummaryStatistics;
 
 
-public final class CollectionUtils
+public interface CollectionUtils
 {
 	public static <T, C extends Collection<T>> Stream<T> ensureStream(
 		final C collection
@@ -37,11 +38,13 @@ public final class CollectionUtils
 		final M map
 	)
 	{
-		return map.entrySet()
+		final Entry<K, V> max = map.entrySet()
 			.parallelStream()
 			.max((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
-			.get()
-			.getKey();
+			.orElse(null);
+		return max != null
+			? max.getKey()
+			: null;
 	}
 
 	public static <T> Collector<T, ?, MonetaryAmount> summingMonetaryAmount(
@@ -56,11 +59,4 @@ public final class CollectionUtils
 			MonetarySummaryStatistics::getSum
 		);
 	}
-
-
-	private CollectionUtils()
-	{
-		throw new Error();
-	}
-
 }

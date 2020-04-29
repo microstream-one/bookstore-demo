@@ -19,13 +19,13 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.javamoney.moneta.Money;
+import javax.money.MonetaryAmount;
+
 import org.rapidpm.dependencies.core.logger.HasLogger;
 
 import com.github.javafaker.Faker;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
-import one.microstream.persistence.types.Storer;
 import one.microstream.storage.types.EmbeddedStorageManager;
 
 public interface RandomDataGenerator extends HasLogger
@@ -115,7 +115,6 @@ public interface RandomDataGenerator extends HasLogger
 		private final BigDecimal             minPrice           = new BigDecimal(5);
 		private final BigDecimal             maxPrice           = new BigDecimal(25);
 		private final BigDecimal             priceRange         = this.maxPrice.subtract(this.minPrice);
-		private final BigDecimal             retailMultiplicant = new BigDecimal(1.11);
 
 		Default(
 			final Books.Default books,
@@ -267,7 +266,6 @@ public interface RandomDataGenerator extends HasLogger
 					.map(title -> this.createBook(country, genres, publishers, authors, language, title))
 					.collect(toList());
 
-				this.books.addAll(books);
 				synchronized(this.bookList)
 				{
 					this.bookList.addAll(books);
@@ -276,9 +274,7 @@ public interface RandomDataGenerator extends HasLogger
 				this.logger().info("+ " + books.size() + " books in "+ country.locale.getDisplayCountry());
 			});
 
-			final Storer storer = this.storageManager.createEagerStorer();
-			storer.store(this.books);
-			storer.commit();
+			this.books.addAll(this.bookList, this.storageManager);
 		}
 
 		private Book createBook(
@@ -298,15 +294,12 @@ public interface RandomDataGenerator extends HasLogger
 					; // empty loop
 				}
 			}
-			final Genre      genre         = genres.get(this.random.nextInt(genres.size()));
-			final Publisher  publisher     = publishers.get(this.random.nextInt(publishers.size()));
-			final Author     author        = authors.get(this.random.nextInt(authors.size()));
-			final BigDecimal purchasePrice = this.randomPurchasePrice();
-			final BigDecimal retailPrice   = this.retailPrice(purchasePrice);
-			return Book.New(isbn, title, author, genre, publisher, language,
-				Money.of(purchasePrice, BookStoreDemo.currencyUnit()),
-				Money.of(retailPrice, BookStoreDemo.currencyUnit())
-			);
+			final Genre          genre         = genres.get(this.random.nextInt(genres.size()));
+			final Publisher      publisher     = publishers.get(this.random.nextInt(publishers.size()));
+			final Author         author        = authors.get(this.random.nextInt(authors.size()));
+			final MonetaryAmount purchasePrice = BookStoreDemo.money(this.randomPurchasePrice());
+			final MonetaryAmount retailPrice   = BookStoreDemo.retailPrice(purchasePrice);
+			return Book.New(isbn, title, author, genre, publisher, language, purchasePrice, retailPrice);
 		}
 
 		private List<Genre> createGenres()
@@ -496,15 +489,6 @@ public interface RandomDataGenerator extends HasLogger
 		{
 			return this.minPrice
 				.add(new BigDecimal(Math.random()).multiply(this.priceRange))
-				.setScale(2, BigDecimal.ROUND_HALF_UP);
-		}
-
-		private BigDecimal retailPrice(
-			final BigDecimal purchasePrice
-		)
-		{
-			return purchasePrice
-				.multiply(this.retailMultiplicant)
 				.setScale(2, BigDecimal.ROUND_HALF_UP);
 		}
 

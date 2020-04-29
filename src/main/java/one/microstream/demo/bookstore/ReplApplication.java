@@ -2,7 +2,7 @@ package one.microstream.demo.bookstore;
 
 import one.microstream.demo.bookstore.data.RandomDataAmount;
 
-public class Application
+public class ReplApplication
 {
 	public static void main(final String[] args)
 	{

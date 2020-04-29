@@ -2,6 +2,6 @@
 
 ## MicroStream BookStore Demo
 
-![BookStore Demo](docs/images/bookstoredemo.svg?raw=true)
+![BookStore Demo](src/main/resources/META-INF/resources/frontend/images/bookstoredemo.svg?raw=true)
 
 Just start the main class [one.microstream.demo.bookstore.Application](src/main/java/one/microstream/demo/bookstore/Application.java) and talk to the console.
