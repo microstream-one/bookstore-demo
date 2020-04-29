@@ -3,4 +3,4 @@
 
 ## MicroStream BookStore Demo
 
-![BookStore Demo](src/main/resources/META-INF/resources/frontend/images/bookstoredemo.svg?raw=true)
+![BookStore Demo](./src/main/resources/META-INF/resources/frontend/images/bookstoredemo.svg?raw=true)
