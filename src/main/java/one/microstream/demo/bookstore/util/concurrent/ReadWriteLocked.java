@@ -6,17 +6,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 public interface ReadWriteLocked
 {
-	public static interface ValueOperation<T>
-	{
-		public T execute();
-	}
-
-	public static interface VoidOperation
-	{
-		public void execute();
-	}
-
-
 	public <T> T read(ValueOperation<T> op);
 
 	public void read(VoidOperation op);

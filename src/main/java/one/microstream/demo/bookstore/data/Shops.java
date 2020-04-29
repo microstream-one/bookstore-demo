@@ -6,20 +6,37 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
 import one.microstream.storage.types.StorageConnection;
 
 public interface Shops
 {
+	public default void add(final Shop shop)
+	{
+		this.add(shop, BookStoreDemo.getInstance().storageManager());
+	}
+
+	public void add(Shop shop, StorageConnection storage);
+
+	public default void addAll(final Collection<? extends Shop> shops)
+	{
+		this.addAll(shops, BookStoreDemo.getInstance().storageManager());
+	}
+
+	public void addAll(Collection<? extends Shop> shops, StorageConnection storage);
+
 	public int shopCount();
+
+	public List<Shop> all();
 
 	public void clear();
 
 	public <T> T compute(Function<Stream<Shop>, T> streamFunction);
 
-	public void add(Shop shop, StorageConnection storage);
+	public <T> T computeInventory(Function<Stream<InventoryItem>, T> function);
 
-	public void addAll(Collection<? extends Shop> shops, StorageConnection storage);
+	public Shop ofName(String name);
 
 
 	public static class Default extends ReadWriteLocked.Scope implements Shops
@@ -29,34 +46,6 @@ public interface Shops
 		Default()
 		{
 			super();
-		}
-
-		@Override
-		public int shopCount()
-		{
-			return this.read(
-				this.shops::size
-			);
-		}
-
-		@Override
-		public void clear()
-		{
-			this.write(() ->
-				this.shops.forEach(Shop::clear)
-			);
-		}
-
-		@Override
-		public <T> T compute(
-			final Function<Stream<Shop>, T> streamFunction
-		)
-		{
-			return this.read(() ->
-				streamFunction.apply(
-					this.shops.parallelStream()
-				)
-			);
 		}
 
 		@Override
@@ -81,6 +70,69 @@ public interface Shops
 				this.shops.addAll(shops);
 				storage.store(this.shops);
 			});
+		}
+
+		@Override
+		public int shopCount()
+		{
+			return this.read(
+				this.shops::size
+			);
+		}
+
+		@Override
+		public List<Shop> all()
+		{
+			return this.read(() ->
+				new ArrayList<>(this.shops)
+			);
+		}
+
+		@Override
+		public void clear()
+		{
+			this.write(() ->
+				this.shops.forEach(Shop::clear)
+			);
+		}
+
+		@Override
+		public <T> T compute(
+			final Function<Stream<Shop>, T> streamFunction
+		)
+		{
+			return this.read(() ->
+				streamFunction.apply(
+					this.shops.parallelStream()
+				)
+			);
+		}
+
+		@Override
+		public <T> T computeInventory(
+			final Function<Stream<InventoryItem>, T> function
+		)
+		{
+			return this.read(() ->
+				function.apply(
+					this.shops.parallelStream().flatMap(shop ->
+						shop.inventory().compute(entries ->
+							entries.map(entry -> InventoryItem.New(shop, entry.getKey(), entry.getValue()))
+						)
+					)
+				)
+			);
+		}
+
+		@Override
+		public Shop ofName(final String name)
+		{
+			return this.read(() ->
+				this.shops.stream()
+					.filter(shop -> shop.name().equals(name))
+					.findAny()
+					.orElse(null)
+			);
 		}
 
 	}

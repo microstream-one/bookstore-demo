@@ -1,24 +1,32 @@
 package one.microstream.demo.bookstore.data;
 
+import static java.util.stream.Collectors.toList;
 import static one.microstream.X.coalesce;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-public interface Inventory extends Entity
+import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
+
+public interface Inventory
 {
-	public Stream<Book> books();
-		
 	public int amount(final Book book);
-	
-	public Stream<Entry<Book, Integer>> slots();
-	
+
+	public <T> T compute(Function<Stream<Entry<Book, Integer>>, T> streamFunction);
+
 	public int slotCount();
-	
-	
-	public static class Default implements Inventory
+
+	public List<Entry<Book, Integer>> slots();
+
+	public List<Book> books();
+
+
+	public static class Default extends ReadWriteLocked.Scope implements Inventory
 	{
 		private final Map<Book, Integer> inventoryMap;
 
@@ -26,7 +34,7 @@ public interface Inventory extends Entity
 		{
 			this(new HashMap<>());
 		}
-		
+
 		Default(
 			final Map<Book, Integer> inventoryMap
 		)
@@ -34,34 +42,52 @@ public interface Inventory extends Entity
 			super();
 			this.inventoryMap = inventoryMap;
 		}
-		
-		@Override
-		public Stream<Book> books()
-		{
-			return this.inventoryMap.keySet().stream();
-		}
-		
+
 		@Override
 		public int amount(final Book book)
 		{
-			return coalesce(
+			return this.read(() -> coalesce(
 				this.inventoryMap.get(book),
 				0
+			));
+		}
+
+		@Override
+		public <T> T compute(
+			final Function<Stream<Entry<Book, Integer>>, T> streamFunction
+		)
+		{
+			return this.read(() ->
+				streamFunction.apply(
+					this.inventoryMap.entrySet().stream()
+				)
 			);
 		}
-		
-		@Override
-		public Stream<Entry<Book, Integer>> slots()
-		{
-			return this.inventoryMap.entrySet().stream();
-		}
-		
+
 		@Override
 		public int slotCount()
 		{
-			return this.inventoryMap.size();
+			return this.read(() ->
+				this.inventoryMap.size()
+			);
+		}
+
+		@Override
+		public List<Entry<Book, Integer>> slots()
+		{
+			return this.read(() ->
+				new ArrayList<>(this.inventoryMap.entrySet())
+			);
+		}
+
+		@Override
+		public List<Book> books()
+		{
+			return this.read(() ->
+				this.inventoryMap.keySet().stream().collect(toList())
+			);
 		}
 
 	}
-	
+
 }

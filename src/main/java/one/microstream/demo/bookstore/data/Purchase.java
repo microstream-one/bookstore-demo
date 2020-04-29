@@ -9,9 +9,9 @@ import java.util.stream.Stream;
 import javax.money.MonetaryAmount;
 
 
-public interface Purchase extends Entity
+public interface Purchase
 {
-	public static interface Item extends Entity
+	public static interface Item
 	{
 		public Book book();
 

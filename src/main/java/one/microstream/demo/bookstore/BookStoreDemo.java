@@ -1,12 +1,16 @@
 
 package one.microstream.demo.bookstore;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Paths;
 import java.util.Locale;
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
+import javax.money.MonetaryAmount;
 
+import org.javamoney.moneta.RoundedMoney;
 import org.rapidpm.dependencies.core.logger.HasLogger;
 
 import one.microstream.demo.bookstore.data.Data;
@@ -20,9 +24,42 @@ import one.microstream.storage.types.EmbeddedStorageManager;
 
 public final class BookStoreDemo implements HasLogger
 {
+	private static BookStoreDemo instance;
+
+	public static BookStoreDemo getInstance()
+	{
+		return instance;
+	}
+
+
+	private static final CurrencyUnit CURRENCY_UNIT       = Monetary.getCurrency(Locale.US);
+	private final static BigDecimal   RETAIL_MULTIPLICANT = scale(new BigDecimal(1.11));
+
+	private static BigDecimal scale(final BigDecimal number)
+	{
+		return number.setScale(2, RoundingMode.HALF_UP);
+	}
+
 	public static CurrencyUnit currencyUnit()
 	{
-		return Monetary.getCurrency(Locale.US);
+		return CURRENCY_UNIT;
+	}
+
+	public static MonetaryAmount money(final double number)
+	{
+		return money(new BigDecimal(number));
+	}
+
+	public static MonetaryAmount money(final BigDecimal number)
+	{
+		return RoundedMoney.of(scale(number), currencyUnit());
+	}
+
+	public static MonetaryAmount retailPrice(
+		final MonetaryAmount purchasePrice
+	)
+	{
+		return money(RETAIL_MULTIPLICANT.multiply(new BigDecimal(purchasePrice.getNumber().doubleValue())));
 	}
 
 
@@ -33,6 +70,7 @@ public final class BookStoreDemo implements HasLogger
 	{
 		super();
 		this.initialDataAmount = initialDataAmount;
+		BookStoreDemo.instance = this;
 	}
 
 	public EmbeddedStorageManager storageManager()

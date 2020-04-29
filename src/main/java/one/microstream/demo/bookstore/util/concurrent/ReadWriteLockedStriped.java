@@ -7,17 +7,6 @@ import com.google.common.util.concurrent.Striped;
 
 public interface ReadWriteLockedStriped
 {
-	public static interface ValueOperation<T>
-	{
-		public T execute();
-	}
-
-	public static interface VoidOperation
-	{
-		public void execute();
-	}
-
-
 	public <T> T read(Object key, ValueOperation<T> op);
 
 	public void read(Object key, VoidOperation op);

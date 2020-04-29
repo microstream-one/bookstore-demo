@@ -69,6 +69,11 @@ public interface Purchases
 
 	public Employee employeeOfTheYear(int year, Country country);
 
+	public default void add(final Purchase purchase)
+	{
+		this.add(purchase, BookStoreDemo.getInstance().storageManager());
+	}
+
 	public void add(Purchase purchase, StorageConnection storage);
 
 
