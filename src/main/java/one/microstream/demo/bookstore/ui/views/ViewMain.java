@@ -4,11 +4,15 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
+import one.microstream.demo.bookstore.BookStoreDemo;
+
 
 @Route(value = "", layout = RootLayout.class)
 public class ViewMain extends VerticalLayout
 {
-	public ViewMain()
+	public ViewMain(
+		final BookStoreDemo bookStoreDemo
+	)
 	{
 		super();
 
