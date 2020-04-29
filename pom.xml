@@ -184,6 +184,7 @@
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <configuration>
                             <jvmArguments>-Dvaadin.productionMode</jvmArguments>
+							<mainClass>one.microstream.demo.bookstore.VaadinApplication</mainClass>
                         </configuration>
                     </plugin>
                     <plugin>
