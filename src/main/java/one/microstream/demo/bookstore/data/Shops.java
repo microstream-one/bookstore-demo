@@ -6,12 +6,23 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
 import one.microstream.storage.types.StorageConnection;
 
 public interface Shops
 {
+	public default void add(final Shop shop)
+	{
+		this.add(shop, BookStoreDemo.getInstance().storageManager());
+	}
+
 	public void add(Shop shop, StorageConnection storage);
+
+	public default void addAll(final Collection<? extends Shop> shops)
+	{
+		this.addAll(shops, BookStoreDemo.getInstance().storageManager());
+	}
 
 	public void addAll(Collection<? extends Shop> shops, StorageConnection storage);
 

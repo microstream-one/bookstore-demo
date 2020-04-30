@@ -17,6 +17,7 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.QueryBuilder;
 
+import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Index.DocumentPopulator;
 import one.microstream.demo.bookstore.data.Index.EntityMatcher;
 import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
@@ -25,7 +26,17 @@ import one.microstream.storage.types.StorageConnection;
 
 public interface Books
 {
+	public default void add(final Book book)
+	{
+		this.add(book, BookStoreDemo.getInstance().storageManager());
+	}
+
 	public void add(Book book, StorageConnection storage);
+
+	public default void addAll(final Collection<? extends Book> books)
+	{
+		this.addAll(books, BookStoreDemo.getInstance().storageManager());
+	}
 
 	public void addAll(Collection<? extends Book> books, StorageConnection storage);
 
@@ -203,6 +214,7 @@ public interface Books
 		{
 			return this.read(() ->
 				this.isbn13ToBook.values().stream()
+					.sorted()
 					.collect(toList())
 			);
 		}
@@ -212,6 +224,7 @@ public interface Books
 		{
 			return this.read(() ->
 				this.authorToBooks.keySet().stream()
+					.sorted()
 					.collect(toList())
 			);
 		}
@@ -221,6 +234,7 @@ public interface Books
 		{
 			return this.read(() ->
 				this.genreToBooks.keySet().stream()
+					.sorted()
 					.collect(toList())
 			);
 		}
@@ -230,6 +244,7 @@ public interface Books
 		{
 			return this.read(() ->
 				this.publisherToBooks.keySet().stream()
+					.sorted()
 					.collect(toList())
 			);
 		}
@@ -239,6 +254,7 @@ public interface Books
 		{
 			return this.read(() ->
 				this.languageToBooks.keySet().stream()
+					.sorted()
 					.collect(toList())
 			);
 		}

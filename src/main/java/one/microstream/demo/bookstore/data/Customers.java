@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
 import one.microstream.storage.types.StorageConnection;
 
@@ -13,9 +14,21 @@ public interface Customers
 {
 	public int customerCount();
 
+	public List<Customer> all();
+
 	public <T> T compute(Function<Stream<Customer>, T> streamFunction);
 
+	public default void add(final Customer customer)
+	{
+		this.add(customer, BookStoreDemo.getInstance().storageManager());
+	}
+
 	public void add(Customer customer, StorageConnection storage);
+
+	public default void addAll(final Collection<? extends Customer> customers)
+	{
+		this.addAll(customers, BookStoreDemo.getInstance().storageManager());
+	}
 
 	public void addAll(Collection<? extends Customer> customers, StorageConnection storage);
 
@@ -34,6 +47,14 @@ public interface Customers
 		{
 			return this.read(
 				this.customers::size
+			);
+		}
+
+		@Override
+		public List<Customer> all()
+		{
+			return this.read(() ->
+				new ArrayList<>(this.customers)
 			);
 		}
 

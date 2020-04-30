@@ -23,52 +23,54 @@ import com.vaadin.flow.data.binder.Binder;
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Author;
 import one.microstream.demo.bookstore.data.Book;
+import one.microstream.demo.bookstore.data.Books;
 import one.microstream.demo.bookstore.data.Genre;
 import one.microstream.demo.bookstore.data.Language;
 import one.microstream.demo.bookstore.data.Publisher;
-import one.microstream.demo.bookstore.ui.data.DataBindingUtils;
 import one.microstream.demo.bookstore.ui.data.DoubleToMonetaryAmountConverter;
 
 @SuppressWarnings("serial")
 public class DialogBookCreate extends Dialog
 {
 	public static void open(
-		final BookStoreDemo bookStoreDemo,
 		final Consumer<Book> successHandler
 	)
 	{
-		new DialogBookCreate(bookStoreDemo, successHandler).open();
+		new DialogBookCreate(successHandler).open();
 	}
 
 
-	private final BookStoreDemo bookStoreDemo;
-
 	private DialogBookCreate(
-		final BookStoreDemo bookStoreDemo,
 		final Consumer<Book> successHandler
 	)
 	{
 		super();
 
-		this.bookStoreDemo = bookStoreDemo;
-
 		final TextField isbn13Field = new TextField("ISBN-13");
 		isbn13Field.setPattern(Book.Validation.isbn13Pattern());
-		isbn13Field.setValue(this.generateIsbn13());
+		isbn13Field.setValue(generateIsbn13());
 
 		final TextField titleField = new TextField("Title");
 
-		final ComboBox<Author> authorCombo = new ComboBox<>("Author");
-		DataBindingUtils.configureAuthorsComboBox(bookStoreDemo, authorCombo);
+		final ComboBox<Author> authorCombo = new ComboBoxNamed<>(
+			"Author",
+			BookStoreDemo.getInstance().data().books().authors()
+		);
 
-		final ComboBox<Genre> genreCombo = new ComboBox<>("Genre");
-		DataBindingUtils.configureGenresComboBox(bookStoreDemo, genreCombo);
+		final ComboBox<Genre> genreCombo = new ComboBoxNamed<>(
+			"Genre",
+			BookStoreDemo.getInstance().data().books().genres()
+		);
 
-		final ComboBox<Publisher> publisherCombo = new ComboBox<>("Publisher");
-		DataBindingUtils.configurePublishersComboBox(bookStoreDemo, publisherCombo);
+		final ComboBox<Publisher> publisherCombo = new ComboBoxNamed<>(
+			"Publisher",
+			BookStoreDemo.getInstance().data().books().publishers()
+		);
 
-		final ComboBox<Language> languageCombo = new ComboBox<>("Language");
-		DataBindingUtils.configureLanguagesComboBox(bookStoreDemo, languageCombo);
+		final ComboBox<Language> languageCombo = new ComboBoxNamed<>(
+			"Language",
+			BookStoreDemo.getInstance().data().books().languages()
+		);
 
 		final NumberField purchasePriceField = new NumberField("Purchase Price");
 
@@ -142,11 +144,12 @@ public class DialogBookCreate extends Dialog
 		));
 	}
 
-	private String generateIsbn13()
+	private static String generateIsbn13()
 	{
 		final Faker faker = Faker.instance();
-		String isbn;
-		while(this.bookStoreDemo.data().books().ofIsbn13(isbn = faker.code().isbn13(true)) != null)
+		final Books books = BookStoreDemo.getInstance().data().books();
+		String      isbn;
+		while(books.ofIsbn13(isbn = faker.code().isbn13(true)) != null)
 		{
 			; // empty loop
 		}
@@ -156,7 +159,7 @@ public class DialogBookCreate extends Dialog
 	private String validateIsbn13(final String isbn13)
 	{
 		Book.Validation.validateIsbn13(isbn13);
-		if(this.bookStoreDemo.data().books().ofIsbn13(isbn13) != null)
+		if(BookStoreDemo.getInstance().data().books().ofIsbn13(isbn13) != null)
 		{
 			throw new IllegalArgumentException("ISBN already assigned to another book");
 		}

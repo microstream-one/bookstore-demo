@@ -23,6 +23,14 @@ import one.microstream.storage.types.EmbeddedStorageManager;
 
 public final class BookStoreDemo implements HasLogger
 {
+	private static BookStoreDemo instance;
+
+	public static BookStoreDemo getInstance()
+	{
+		return instance;
+	}
+
+
 	public static CurrencyUnit currencyUnit()
 	{
 		return Monetary.getCurrency(Locale.US);
@@ -53,6 +61,7 @@ public final class BookStoreDemo implements HasLogger
 	{
 		super();
 		this.initialDataAmount = initialDataAmount;
+		BookStoreDemo.instance = this;
 	}
 
 	public EmbeddedStorageManager storageManager()
