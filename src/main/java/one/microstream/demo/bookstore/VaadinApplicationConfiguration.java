@@ -11,6 +11,8 @@ public class VaadinApplicationConfiguration
 	@Bean(destroyMethod = "shutdown")
 	public BookStoreDemo getBookStoreDemo()
 	{
-		return new BookStoreDemo(RandomDataAmount.Medium());
+		final BookStoreDemo demo = new BookStoreDemo(RandomDataAmount.Medium());
+		demo.storageManager(); // eager init
+		return demo;
 	}
 }
