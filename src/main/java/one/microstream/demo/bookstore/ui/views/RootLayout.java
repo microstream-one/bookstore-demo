@@ -22,6 +22,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 @Push
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @CssImport("./styles/shared-styles.css")
+@SuppressWarnings("serial")
 public class RootLayout
 	extends AppLayoutRouterLayout<LeftLayouts.LeftResponsive>
 	implements PageConfigurator
@@ -64,4 +65,5 @@ public class RootLayout
 		settings.addLink   ("shortcut icon", "frontend/images/logo.ico"           );
 		settings.addFavIcon("icon"         , "frontend/images/logo256.png", "256x256");
 	}
+
 }

@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.Year;
@@ -489,7 +490,7 @@ public interface RandomDataGenerator extends HasLogger
 		{
 			return this.minPrice
 				.add(new BigDecimal(Math.random()).multiply(this.priceRange))
-				.setScale(2, BigDecimal.ROUND_HALF_UP);
+				.setScale(2, RoundingMode.HALF_UP);
 		}
 
 		private IntStream randomRange(

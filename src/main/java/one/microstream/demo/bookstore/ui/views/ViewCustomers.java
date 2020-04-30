@@ -5,6 +5,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "customers", layout = RootLayout.class)
+@SuppressWarnings("serial")
 public class ViewCustomers extends VerticalLayout
 {
 	public ViewCustomers()

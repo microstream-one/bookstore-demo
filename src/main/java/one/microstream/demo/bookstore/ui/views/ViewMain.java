@@ -6,8 +6,8 @@ import com.vaadin.flow.router.Route;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 
-
 @Route(value = "", layout = RootLayout.class)
+@SuppressWarnings("serial")
 public class ViewMain extends VerticalLayout
 {
 	public ViewMain(

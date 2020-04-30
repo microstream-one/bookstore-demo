@@ -23,6 +23,7 @@ import one.microstream.demo.bookstore.data.Publisher;
 import one.microstream.demo.bookstore.ui.data.DataBindingUtils;
 
 @Route(value = "books", layout = RootLayout.class)
+@SuppressWarnings("serial")
 public class ViewBooks extends VerticalLayout
 {
 	final BookStoreDemo                                                     bookStoreDemo;

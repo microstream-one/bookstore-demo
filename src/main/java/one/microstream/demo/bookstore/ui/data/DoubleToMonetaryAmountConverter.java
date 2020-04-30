@@ -8,6 +8,7 @@ import com.vaadin.flow.data.converter.Converter;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 
+@SuppressWarnings("serial")
 public class DoubleToMonetaryAmountConverter implements Converter<Double, MonetaryAmount>
 {
 	public DoubleToMonetaryAmountConverter()

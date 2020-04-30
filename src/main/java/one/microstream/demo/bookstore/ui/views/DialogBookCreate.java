@@ -29,6 +29,7 @@ import one.microstream.demo.bookstore.data.Publisher;
 import one.microstream.demo.bookstore.ui.data.DataBindingUtils;
 import one.microstream.demo.bookstore.ui.data.DoubleToMonetaryAmountConverter;
 
+@SuppressWarnings("serial")
 public class DialogBookCreate extends Dialog
 {
 	public static void open(
