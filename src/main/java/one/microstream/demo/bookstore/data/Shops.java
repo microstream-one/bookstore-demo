@@ -28,9 +28,13 @@ public interface Shops
 
 	public int shopCount();
 
+	public List<Shop> all();
+
 	public void clear();
 
 	public <T> T compute(Function<Stream<Shop>, T> streamFunction);
+
+	public Shop ofName(String name);
 
 
 	public static class Default extends ReadWriteLocked.Scope implements Shops
@@ -75,6 +79,14 @@ public interface Shops
 		}
 
 		@Override
+		public List<Shop> all()
+		{
+			return this.read(() ->
+				new ArrayList<>(this.shops)
+			);
+		}
+
+		@Override
 		public void clear()
 		{
 			this.write(() ->
@@ -91,6 +103,17 @@ public interface Shops
 				streamFunction.apply(
 					this.shops.parallelStream()
 				)
+			);
+		}
+
+		@Override
+		public Shop ofName(final String name)
+		{
+			return this.read(() ->
+				this.shops.stream()
+					.filter(shop -> shop.name().equals(name))
+					.findAny()
+					.orElse(null)
 			);
 		}
 

@@ -9,8 +9,14 @@ import java.util.regex.Pattern;
 
 import javax.money.MonetaryAmount;
 
-public interface Book extends Entity, Comparable<Book>
+public interface Book extends Named
 {
+	@Override
+	default String name()
+	{
+		return this.title();
+	}
+
 	public String isbn13();
 
 	public String title();
@@ -208,12 +214,6 @@ public interface Book extends Entity, Comparable<Book>
 		public MonetaryAmount retailPrice()
 		{
 			return this.retailPrice;
-		}
-
-		@Override
-		public int compareTo(final Book other)
-		{
-			return this.title.compareTo(other.title());
 		}
 
 		@Override

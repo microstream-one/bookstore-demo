@@ -49,6 +49,7 @@ public class RootLayout
 				.add(new LeftNavigationItem("Home", VaadinIcon.HOME.create(), ViewMain.class))
 				.add(new LeftNavigationItem("Books", VaadinIcon.BOOK.create(), ViewBooks.class))
 				.add(new LeftNavigationItem("Shops", VaadinIcon.SHOP.create(), ViewShops.class))
+				.add(new LeftNavigationItem("Inventory", VaadinIcon.STORAGE.create(), ViewInventory.class))
 				.add(new LeftNavigationItem("Customers", SocialIcons.PERSON.create(), ViewCustomers.class))
 				.add(new LeftNavigationItem("Purchases", IronIcons.SHOPPING_BASKET.create(), ViewPurchases.class))
 				.build()

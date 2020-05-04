@@ -424,7 +424,7 @@ public interface RandomDataGenerator extends HasLogger
 			final Shop shop
 		)
 		{
-			final List<Book>     books      = shop.inventory().books().collect(toList());
+			final List<Book>     books      = shop.inventory().books();
 			final boolean        isLeapYear = Year.of(year).isLeap();
 			final Random         random     = this.random;
 			return shop.employees().flatMap(employee ->

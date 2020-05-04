@@ -1,19 +1,16 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import java.util.List;
-
 import com.vaadin.flow.router.Route;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Customer;
+import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
 
 @Route(value = "customers", layout = RootLayout.class)
 @SuppressWarnings("serial")
 public class ViewCustomers extends ViewNamedWithAddress<Customer>
 {
-	public ViewCustomers(
-		final BookStoreDemo bookStoreDemo
-	)
+	public ViewCustomers()
 	{
 		super();
 	}
@@ -26,8 +23,9 @@ public class ViewCustomers extends ViewNamedWithAddress<Customer>
 	}
 
 	@Override
-	protected List<Customer> entities()
+	protected Backend<Customer> backend()
 	{
-		return BookStoreDemo.getInstance().data().customers().all();
+		return BookStoreDemo.getInstance().data().customers()::compute;
 	}
+
 }

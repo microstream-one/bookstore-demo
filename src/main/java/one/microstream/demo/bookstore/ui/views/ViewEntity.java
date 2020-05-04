@@ -14,20 +14,19 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
-import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 
-import one.microstream.demo.bookstore.data.Entity;
 import one.microstream.demo.bookstore.data.Named;
+import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider;
 
-public abstract class ViewEntity<E extends Entity> extends VerticalLayout
+public abstract class ViewEntity<E> extends VerticalLayout
 {
-	final Grid<E>                                                     grid;
-	final List<FilterField<E, ?>>                                     filterFields;
-	ConfigurableFilterDataProvider<E, Void, SerializablePredicate<E>> dataProvider;
+	final Grid<E>                  grid;
+	final List<FilterField<E, ?>>  filterFields;
+	BookStoreDataProvider<E> dataProvider;
 
 	protected ViewEntity()
 	{
@@ -38,28 +37,27 @@ public abstract class ViewEntity<E extends Entity> extends VerticalLayout
 
 		this.filterFields = new ArrayList<>();
 
-		this.createUI();
-
 		this.setSizeFull();
-		this.add(this.grid);
-		this.updateDataProvider();
+
+		this.addAttachListener(event ->
+		{
+			this.createUI();
+			this.add(this.grid);
+
+			this.dataProvider = BookStoreDataProvider.New(this.backend());
+			this.updateFilter();
+			this.grid.setDataProvider(this.dataProvider);
+		});
 	}
 
 	protected abstract void createUI();
 
-	protected final void updateDataProvider()
+	protected abstract BookStoreDataProvider.Backend<E> backend();
+
+	protected final void refresh()
 	{
-		this.dataProvider = DataProvider.ofCollection(
-			this.entities()
-		)
-		.withConfigurableFilter();
-
-		this.grid.setDataProvider(this.dataProvider);
-
-		this.updateFilter();
+		this.dataProvider.refreshAll();
 	}
-
-	protected abstract List<E> entities();
 
 	protected final void updateFilter()
 	{
@@ -109,11 +107,14 @@ public abstract class ViewEntity<E extends Entity> extends VerticalLayout
 		final ValueProvider<E, String> valueProvider
 	)
 	{
+		final FilterTextField<E> text = new FilterTextField<>(
+			title,
+			value -> entity -> StringUtils.containsIgnoreCase(valueProvider.apply(entity), value)
+		);
+		text.addValueChangeListener(event -> this.updateFilter());
 		return this.addGridColumn(
 			valueProvider,
-			new FilterTextField<>(this, title,
-				value -> entity -> StringUtils.containsIgnoreCase(valueProvider.apply(entity), value)
-			)
+			text
 		);
 	}
 
@@ -122,7 +123,17 @@ public abstract class ViewEntity<E extends Entity> extends VerticalLayout
 		final ValueProvider<E, F> valueProvider
 	)
 	{
-		final FilterComboBox<E, F> combo = new FilterComboBox<>(this, title,
+		return this.addGridColumnWithDynamicFilter(title, valueProvider, null);
+	}
+
+	protected <F extends Named> Grid.Column<E> addGridColumnWithDynamicFilter(
+		final String title,
+		final ValueProvider<E, F> valueProvider,
+		final F preselectedValue
+	)
+	{
+		final FilterComboBox<E, F> combo = new FilterComboBox<>(
+			title,
 			value -> entity -> valueProvider.apply(entity) == value
 		);
 		combo.setDataProvider(new AbstractBackEndDataProvider<F, String>()
@@ -167,6 +178,14 @@ public abstract class ViewEntity<E extends Entity> extends VerticalLayout
 			}
 		});
 		this.markAsDynamic(combo);
+
+		if(preselectedValue != null)
+		{
+			combo.setValue(preselectedValue);
+		}
+
+		combo.addValueChangeListener(event -> this.updateFilter());
+
 		return this.addGridColumn(
 			entity -> valueProvider.apply(entity).name(),
 			combo
@@ -196,5 +215,10 @@ public abstract class ViewEntity<E extends Entity> extends VerticalLayout
 				dataProvider.refreshAll();
 			}
 		}
+	}
+
+	protected E getSelectedEntity()
+	{
+		return this.grid.getSelectionModel().getFirstSelectedItem().orElse(null);
 	}
 }
