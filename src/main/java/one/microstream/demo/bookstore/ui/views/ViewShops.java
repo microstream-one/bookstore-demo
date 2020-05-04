@@ -3,6 +3,7 @@ package one.microstream.demo.bookstore.ui.views;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.flowingcode.vaadin.addons.ironicons.IronIcons;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -33,13 +34,21 @@ public class ViewShops extends ViewNamedWithAddress<Shop>
 			VaadinIcon.STOCK.create(),
 			event -> this.showInventory(this.getSelectedEntity())
 		);
+		final Button showPurchasesButton = new Button(
+			"Show Purchases",
+			IronIcons.SHOPPING_BASKET.create(),
+			event -> this.showPurchases(this.getSelectedEntity())
+		);
+
 		showInventoryButton.setEnabled(false);
+		showPurchasesButton.setEnabled(false);
 		this.grid.addSelectionListener(event -> {
 			final boolean b = event.getFirstSelectedItem().isPresent();
 			showInventoryButton.setEnabled(b);
+			showPurchasesButton.setEnabled(b);
 		});
 
-		this.add(new HorizontalLayout(showInventoryButton));
+		this.add(new HorizontalLayout(showInventoryButton, showPurchasesButton));
 	}
 
 	private void showInventory(final Shop shop)
@@ -47,6 +56,13 @@ public class ViewShops extends ViewNamedWithAddress<Shop>
 		final Map<String, String> params = new HashMap<>();
 		params.put("shop", shop.name());
 		this.getUI().get().navigate("inventory", QueryParameters.simple(params));
+	}
+
+	private void showPurchases(final Shop shop)
+	{
+		final Map<String, String> params = new HashMap<>();
+		params.put("shop", shop.name());
+		this.getUI().get().navigate("purchases", QueryParameters.simple(params));
 	}
 
 	@Override

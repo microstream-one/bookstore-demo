@@ -25,12 +25,12 @@ public class ViewBooks extends ViewEntity<Book>
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumnWithTextFilter   ("Title"    , Book::title    );
-		this.addGridColumnWithDynamicFilter("Author"   , Book::author   );
-		this.addGridColumnWithDynamicFilter("Genre"    , Book::genre    );
-		this.addGridColumnWithDynamicFilter("Publisher", Book::publisher);
-		this.addGridColumnWithDynamicFilter("Language" , Book::language );
-		this.addGridColumnWithTextFilter   ("ISBN"     , Book::isbn13   );
+		this.addGridColumnWithTextFilter   (Book::title    , "Title"    );
+		this.addGridColumnWithDynamicFilter(Book::author   , "Author"   );
+		this.addGridColumnWithDynamicFilter(Book::genre    , "Genre"    );
+		this.addGridColumnWithDynamicFilter(Book::publisher, "Publisher");
+		this.addGridColumnWithDynamicFilter(Book::language , "Language" );
+		this.addGridColumnWithTextFilter   (Book::isbn13     , "ISBN"   );
 
 		final Button showInventoryButton = new Button(
 			"Show Inventory",

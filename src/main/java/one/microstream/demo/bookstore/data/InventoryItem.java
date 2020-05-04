@@ -1,7 +1,4 @@
-package one.microstream.demo.bookstore.ui.data;
-
-import one.microstream.demo.bookstore.data.Book;
-import one.microstream.demo.bookstore.data.Shop;
+package one.microstream.demo.bookstore.data;
 
 public interface InventoryItem
 {

@@ -12,6 +12,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -34,6 +35,11 @@ public abstract class ViewEntity<E> extends VerticalLayout
 
 		this.grid = new Grid<>();
 		this.grid.setMultiSort(true);
+		this.grid.addThemeVariants(
+			GridVariant.LUMO_NO_BORDER,
+			GridVariant.LUMO_NO_ROW_BORDERS,
+			GridVariant.LUMO_ROW_STRIPES
+		);
 
 		this.filterFields = new ArrayList<>();
 
@@ -103,8 +109,8 @@ public abstract class ViewEntity<E> extends VerticalLayout
 	}
 
 	protected Grid.Column<E> addGridColumnWithTextFilter(
-		final String title,
-		final ValueProvider<E, String> valueProvider
+		final ValueProvider<E, String> valueProvider,
+		final String title
 	)
 	{
 		final FilterTextField<E> text = new FilterTextField<>(
@@ -119,16 +125,16 @@ public abstract class ViewEntity<E> extends VerticalLayout
 	}
 
 	protected <F extends Named> Grid.Column<E> addGridColumnWithDynamicFilter(
-		final String title,
-		final ValueProvider<E, F> valueProvider
+		final ValueProvider<E, F> valueProvider,
+		final String title
 	)
 	{
-		return this.addGridColumnWithDynamicFilter(title, valueProvider, null);
+		return this.addGridColumnWithDynamicFilter(valueProvider, title, null);
 	}
 
 	protected <F extends Named> Grid.Column<E> addGridColumnWithDynamicFilter(
-		final String title,
 		final ValueProvider<E, F> valueProvider,
+		final String title,
 		final F preselectedValue
 	)
 	{

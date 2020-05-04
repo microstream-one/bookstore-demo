@@ -2,8 +2,6 @@ package one.microstream.demo.bookstore.ui.views;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -12,9 +10,9 @@ import com.vaadin.flow.router.Route;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Book;
+import one.microstream.demo.bookstore.data.InventoryItem;
 import one.microstream.demo.bookstore.data.Shop;
 import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
-import one.microstream.demo.bookstore.ui.data.InventoryItem;
 
 @Route(value = "inventory", layout = RootLayout.class)
 @SuppressWarnings("serial")
@@ -49,28 +47,15 @@ public class ViewInventory extends ViewEntity<InventoryItem> implements HasUrlPa
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumnWithDynamicFilter("Shop", InventoryItem::shop, this.shop);
-		this.addGridColumnWithDynamicFilter("Book", InventoryItem::book, this.book);
+		this.addGridColumnWithDynamicFilter(InventoryItem::shop, "Shop", this.shop);
+		this.addGridColumnWithDynamicFilter(InventoryItem::book, "Book", this.book);
 		this.addGridColumn(InventoryItem::amount, "Amount");
 	}
 
 	@Override
 	protected Backend<InventoryItem> backend()
 	{
-		return this::compute;
-	}
-
-
-	private <R> R compute(final Function<Stream<InventoryItem>, R> function)
-	{
-		final Stream<InventoryItem> items = BookStoreDemo.getInstance().data().shops().compute(shops ->
-			shops.flatMap(shop ->
-				shop.inventory().compute(entries ->
-					entries.map(entry -> InventoryItem.New(shop, entry.getKey(), entry.getValue()))
-				)
-			)
-		);
-		return function.apply(items);
+		return BookStoreDemo.getInstance().data().shops()::computeInventory;
 	}
 
 }

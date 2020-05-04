@@ -34,6 +34,8 @@ public interface Shops
 
 	public <T> T compute(Function<Stream<Shop>, T> streamFunction);
 
+	public <T> T computeInventory(Function<Stream<InventoryItem>, T> function);
+
 	public Shop ofName(String name);
 
 
@@ -102,6 +104,22 @@ public interface Shops
 			return this.read(() ->
 				streamFunction.apply(
 					this.shops.parallelStream()
+				)
+			);
+		}
+
+		@Override
+		public <T> T computeInventory(
+			final Function<Stream<InventoryItem>, T> function
+		)
+		{
+			return this.read(() ->
+				function.apply(
+					this.shops.parallelStream().flatMap(shop ->
+						shop.inventory().compute(entries ->
+							entries.map(entry -> InventoryItem.New(shop, entry.getKey(), entry.getValue()))
+						)
+					)
 				)
 			);
 		}
