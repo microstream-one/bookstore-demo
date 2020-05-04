@@ -10,7 +10,6 @@ public class FilterTextField<E> extends TextField implements FilterField<E, Stri
 	private final SerializableFunction<String, SerializablePredicate<E>> filterFactory;
 
 	public FilterTextField(
-		final String placeholder,
 		final SerializableFunction<String, SerializablePredicate<E>> filterFactory
 	)
 	{
@@ -18,7 +17,7 @@ public class FilterTextField<E> extends TextField implements FilterField<E, Stri
 
 		this.filterFactory = filterFactory;
 
-		this.setPlaceholder(placeholder);
+		this.setPlaceholder("Filter");
 		this.setClearButtonVisible(true);
 		this.setValueChangeMode(ValueChangeMode.TIMEOUT);
 	}

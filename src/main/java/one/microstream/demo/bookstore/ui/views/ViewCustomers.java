@@ -25,7 +25,7 @@ public class ViewCustomers extends ViewNamedWithAddress<Customer>
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumn(Customer::customerId, "ID");
+		this.addGridColumn("ID", Customer::customerId);
 		this.addGridColumnForName();
 		this.addGridColumnsForAddress();
 

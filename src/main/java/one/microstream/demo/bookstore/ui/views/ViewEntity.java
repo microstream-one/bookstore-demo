@@ -10,9 +10,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -25,21 +28,16 @@ import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider;
 
 public abstract class ViewEntity<E> extends VerticalLayout
 {
-	final Grid<E>                  grid;
-	final List<FilterField<E, ?>>  filterFields;
-	BookStoreDataProvider<E> dataProvider;
+	final Grid<E>                 grid;
+	final List<FilterField<E, ?>> filterFields;
+	HeaderRow                     filterRow;
+	BookStoreDataProvider<E>      dataProvider;
 
 	protected ViewEntity()
 	{
 		super();
 
-		this.grid = new Grid<>();
-		this.grid.setMultiSort(true);
-		this.grid.addThemeVariants(
-			GridVariant.LUMO_NO_BORDER,
-			GridVariant.LUMO_NO_ROW_BORDERS,
-			GridVariant.LUMO_ROW_STRIPES
-		);
+		this.grid = this.createGrid();
 
 		this.filterFields = new ArrayList<>();
 
@@ -54,6 +52,18 @@ public abstract class ViewEntity<E> extends VerticalLayout
 			this.updateFilter();
 			this.grid.setDataProvider(this.dataProvider);
 		});
+	}
+
+	protected <T> Grid<T> createGrid()
+	{
+		final Grid<T> grid = new Grid<>();
+		grid.setMultiSort(true);
+		grid.addThemeVariants(
+			GridVariant.LUMO_NO_BORDER,
+			GridVariant.LUMO_NO_ROW_BORDERS,
+			GridVariant.LUMO_ROW_STRIPES
+		);
+		return grid;
 	}
 
 	protected abstract void createUI();
@@ -77,69 +87,84 @@ public abstract class ViewEntity<E> extends VerticalLayout
 		this.filterFields.forEach(this::refreshIfDynamic);
 	}
 
-	protected Grid.Column<E> addGridColumn(final ValueProvider<E, ?> valueProvider)
+	protected Grid.Column<E> addGridColumn(
+		final String title,
+		final ValueProvider<E, ?> valueProvider
+	)
 	{
-		return this.grid.addColumn(valueProvider)
+		return addGridColumn(this.grid, title, valueProvider);
+	}
+
+	protected static <T> Grid.Column<T> addGridColumn(
+		final Grid<T> grid,
+		final String title,
+		final ValueProvider<T, ?> valueProvider
+	)
+	{
+		return grid.addColumn(valueProvider)
+			.setHeader(title)
 			.setResizable(true)
 			.setSortable(true);
 	}
 
 	@SuppressWarnings("unchecked")
 	protected Grid.Column<E> addGridColumn(
+		final String title,
 		final ValueProvider<E, ?> valueProvider,
-		final Component headerComponent
+		final Component filterComponent
 	)
 	{
-		if(headerComponent instanceof FilterField)
+		if(filterComponent instanceof FilterField)
 		{
-			this.filterFields.add((FilterField<E, ?>)headerComponent);
+			this.filterFields.add((FilterField<E, ?>)filterComponent);
 		}
 
-		return this.addGridColumn(valueProvider)
-			.setHeader(headerComponent);
-	}
+		final Column<E> column = this.addGridColumn(title, valueProvider);
 
-	protected Grid.Column<E> addGridColumn(
-		final ValueProvider<E, ?> valueProvider,
-		final String labelText
-	)
-	{
-		return this.addGridColumn(valueProvider)
-			.setHeader(labelText);
+		if(filterComponent instanceof HasSize)
+		{
+			((HasSize)filterComponent).setSizeFull();
+		}
+		if(this.filterRow == null)
+		{
+			this.filterRow = this.grid.appendHeaderRow();
+		}
+		this.filterRow.getCell(column).setComponent(filterComponent);
+
+		return column;
 	}
 
 	protected Grid.Column<E> addGridColumnWithTextFilter(
-		final ValueProvider<E, String> valueProvider,
-		final String title
+		final String title,
+		final ValueProvider<E, String> valueProvider
 	)
 	{
 		final FilterTextField<E> text = new FilterTextField<>(
-			title,
 			value -> entity -> StringUtils.containsIgnoreCase(valueProvider.apply(entity), value)
 		);
 		text.addValueChangeListener(event -> this.updateFilter());
 		return this.addGridColumn(
+			title,
 			valueProvider,
 			text
 		);
 	}
 
 	protected <F extends Named> Grid.Column<E> addGridColumnWithDynamicFilter(
-		final ValueProvider<E, F> valueProvider,
-		final String title
+		final String title,
+		final ValueProvider<E, F> valueProvider
 	)
 	{
-		return this.addGridColumnWithDynamicFilter(valueProvider, title, null);
+		return this.addGridColumnWithDynamicFilter(title, valueProvider, null);
 	}
 
 	protected <F extends Named> Grid.Column<E> addGridColumnWithDynamicFilter(
-		final ValueProvider<E, F> valueProvider,
 		final String title,
+		final ValueProvider<E, F> valueProvider,
 		final F preselectedValue
 	)
 	{
 		final FilterComboBox<E, F> combo = new FilterComboBox<>(
-			title,
 			value -> entity -> valueProvider.apply(entity) == value
 		);
 		combo.setDataProvider(new AbstractBackEndDataProvider<F, String>()
@@ -193,6 +218,7 @@ public abstract class ViewEntity<E> extends VerticalLayout
 		combo.addValueChangeListener(event -> this.updateFilter());
 
 		return this.addGridColumn(
+			title,
 			entity -> valueProvider.apply(entity).name(),
 			combo
 		);

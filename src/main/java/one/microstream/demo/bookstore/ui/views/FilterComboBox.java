@@ -11,7 +11,6 @@ public class FilterComboBox<E, F extends Named> extends ComboBoxNamed<F> impleme
 	private final Function<F, SerializablePredicate<E>> filterFactory;
 
 	public FilterComboBox(
-		final String placeholder,
 		final Function<F, SerializablePredicate<E>> filterFactory
 	)
 	{
@@ -19,7 +18,7 @@ public class FilterComboBox<E, F extends Named> extends ComboBoxNamed<F> impleme
 
 		this.filterFactory = filterFactory;
 
-		this.setPlaceholder(placeholder);
+		this.setPlaceholder("Filter");
 		this.setClearButtonVisible(true);
 	}
 

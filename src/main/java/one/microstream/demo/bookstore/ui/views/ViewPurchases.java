@@ -7,9 +7,13 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Range;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
@@ -62,11 +66,11 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumnWithDynamicFilter(Purchase::shop, "Shop", this.shop);
-		this.addGridColumnWithDynamicFilter(Purchase::employee, "Employee");
-		this.addGridColumnWithDynamicFilter(Purchase::customer, "Customer", this.customer);
-		this.addGridColumn(Purchase::timestamp, "Timestamp");
-		this.addGridColumn(Purchase::total, "Total");
+		this.addGridColumnWithDynamicFilter("Shop", Purchase::shop, this.shop);
+		this.addGridColumnWithDynamicFilter("Employee", Purchase::employee);
+		this.addGridColumnWithDynamicFilter("Customer", Purchase::customer, this.customer);
+		this.addGridColumn("Timestamp", Purchase::timestamp);
+		this.addGridColumn("Total", Purchase::total);
 
 		final Range<Integer> years = BookStoreDemo.getInstance().data().purchases().years();
 
@@ -83,6 +87,24 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 		final HorizontalLayout bar = new HorizontalLayout(new Label("Year"), yearField);
 		bar.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
 		this.add(bar);
+
+		this.grid.setItemDetailsRenderer(new ComponentRenderer<>(this::createPurchaseDetails));
+		this.grid.setDetailsVisibleOnClick(true);
+	}
+
+	private Component createPurchaseDetails(final Purchase purchase)
+	{
+		final Grid<Purchase.Item> grid = this.createGrid();
+		addGridColumn(grid, "ISBN", item -> item.book().isbn13());
+		addGridColumn(grid, "Book", item -> item.book().title());
+		addGridColumn(grid, "Author", item -> item.book().author().name());
+		addGridColumn(grid, "Publisher", item -> item.book().publisher().name());
+		addGridColumn(grid, "Price", item -> item.price());
+		addGridColumn(grid, "Amount", item -> item.amount());
+		addGridColumn(grid, "Total", item -> item.itemTotal());
+		grid.setDataProvider(DataProvider.fromStream(purchase.items()));
+		grid.setHeightByRows(true);
+		return grid;
 	}
 
 	@Override

@@ -47,9 +47,9 @@ public class ViewInventory extends ViewEntity<InventoryItem> implements HasUrlPa
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumnWithDynamicFilter(InventoryItem::shop, "Shop", this.shop);
-		this.addGridColumnWithDynamicFilter(InventoryItem::book, "Book", this.book);
-		this.addGridColumn(InventoryItem::amount, "Amount");
+		this.addGridColumnWithDynamicFilter("Shop", InventoryItem::shop, this.shop);
+		this.addGridColumnWithDynamicFilter("Book", InventoryItem::book, this.book);
+		this.addGridColumn("Amount", InventoryItem::amount);
 	}
 
 	@Override
