@@ -1,5 +1,3 @@
-![GitHub](https://img.shields.io/github/license/microstream-one/bookstore-demo)
-
 # MicroStream BookStore Demo
 
 ![BookStore Demo](./src/main/resources/META-INF/resources/frontend/images/bookstoredemo.svg?raw=true)
