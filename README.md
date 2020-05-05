@@ -1,7 +1,5 @@
 # MicroStream BookStore Demo
 
-![BookStore Demo](./src/main/resources/META-INF/resources/frontend/images/bookstoredemo.svg?raw=true)
-
 Deploy this demo to Gitpod:
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/microstream-one/bookstore-demo)
