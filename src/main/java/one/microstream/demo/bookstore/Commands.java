@@ -13,6 +13,10 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 
+/**
+ * Collection of picocli {@link Command}s for the {@link Repl}.
+ *
+ */
 @Command(name = "")
 public class Commands
 {

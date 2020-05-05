@@ -4,23 +4,64 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
+/**
+ * Facility to execute operations with read and write locks.
+ * <p>
+ * Non-reentrant read operations are not allowed until all write operations have been finished.
+ * Additionally, a write operation can acquire the read lock, but not vice-versa.
+ */
 public interface ReadWriteLocked
 {
-	public <T> T read(ValueOperation<T> op);
+	/**
+	 * Executes an operation protected by a read lock.
+	 *
+	 * @param <T> the operation's return type
+	 * @param operation the operation to execute
+	 * @return the operation's result
+	 */
+	public <T> T read(ValueOperation<T> operation);
 
-	public void read(VoidOperation op);
+	/**
+	 * Executes an operation protected by a read lock.
+	 *
+	 * @param operation the operation to execute
+	 */
+	public void read(VoidOperation operation);
 
-	public <T> T write(ValueOperation<T> op);
+	/**
+	 * Executes an operation protected by a write lock.
+	 *
+	 * @param <T> the operation's return type
+	 * @param operation the operation to execute
+	 * @return the operation's result
+	 */
+	public <T> T write(ValueOperation<T> operation);
 
-	public void write(VoidOperation op);
+	/**
+	 * Executes an operation protected by a write lock.
+	 *
+	 * @param operation the operation to execute
+	 */
+	public void write(VoidOperation operation);
 
 
+	/**
+	 * Pseudo-constructor method to create a new {@link ReadWriteLocked}
+	 * instance with default implementation.
+	 *
+	 * @return a new {@link ReadWriteLocked} instance
+	 */
 	public static ReadWriteLocked New()
 	{
 		return new Default();
 	}
 
 
+	/**
+	 * Default implementation of the {@link ReadWriteLocked} interface
+	 * which utilizes a {@link ReentrantReadWriteLock} for locking.
+	 *
+	 */
 	public static class Default implements ReadWriteLocked
 	{
 		private final ReentrantReadWriteLock mutex = new ReentrantReadWriteLock();
@@ -31,14 +72,14 @@ public interface ReadWriteLocked
 		}
 
 		@Override
-		public <T> T read(final ValueOperation<T> op)
+		public <T> T read(final ValueOperation<T> operation)
 		{
 			final ReadLock readLock = this.mutex.readLock();
 			readLock.lock();
 
 			try
 			{
-				return op.execute();
+				return operation.execute();
 			}
 			finally
 			{
@@ -47,14 +88,14 @@ public interface ReadWriteLocked
 		}
 
 		@Override
-		public void read(final VoidOperation op)
+		public void read(final VoidOperation operation)
 		{
 			final ReadLock readLock = this.mutex.readLock();
 			readLock.lock();
 
 			try
 			{
-				op.execute();
+				operation.execute();
 			}
 			finally
 			{
@@ -63,14 +104,14 @@ public interface ReadWriteLocked
 		}
 
 		@Override
-		public <T> T write(final ValueOperation<T> op)
+		public <T> T write(final ValueOperation<T> operation)
 		{
 			final WriteLock writeLock = this.mutex.writeLock();
 			writeLock.lock();
 
 			try
 			{
-				return op.execute();
+				return operation.execute();
 			}
 			finally
 			{
@@ -79,14 +120,14 @@ public interface ReadWriteLocked
 		}
 
 		@Override
-		public void write(final VoidOperation op)
+		public void write(final VoidOperation operation)
 		{
 			final WriteLock writeLock = this.mutex.writeLock();
 			writeLock.lock();
 
 			try
 			{
-				op.execute();
+				operation.execute();
 			}
 			finally
 			{
@@ -97,8 +138,15 @@ public interface ReadWriteLocked
 	}
 
 
+	/**
+	 * Abstract base class for {@link ReadWriteLocked} scopes.
+	 *
+	 */
 	public static abstract class Scope implements ReadWriteLocked
 	{
+		/*
+		 * Transient means it is not persisted by MicroStream, but created on demand.
+		 */
 		private transient volatile ReadWriteLocked delegate;
 
 		protected Scope()
@@ -108,42 +156,47 @@ public interface ReadWriteLocked
 
 		protected ReadWriteLocked delegate()
 		{
-			if(this.delegate == null)
+			/*
+			 * Double-checked locking to reduce the overhead of acquiring a lock
+			 * by testing the locking criterion.
+			 * The field (this.delegate) has to be volatile.
+			 */
+			ReadWriteLocked delegate = this.delegate;
+			if(delegate == null)
 			{
 				synchronized(this)
 				{
-					if(this.delegate == null)
+					if((delegate = this.delegate) == null)
 					{
-						this.delegate = ReadWriteLocked.New();
+						delegate = this.delegate = ReadWriteLocked.New();
 					}
 				}
 			}
-
-			return this.delegate;
+			return delegate;
 		}
 
 		@Override
-		public <T> T read(final ValueOperation<T> op)
+		public <T> T read(final ValueOperation<T> operation)
 		{
-			return this.delegate().read(op);
+			return this.delegate().read(operation);
 		}
 
 		@Override
-		public void read(final VoidOperation op)
+		public void read(final VoidOperation operation)
 		{
-			this.delegate().read(op);
+			this.delegate().read(operation);
 		}
 
 		@Override
-		public <T> T write(final ValueOperation<T> op)
+		public <T> T write(final ValueOperation<T> operation)
 		{
-			return this.delegate().write(op);
+			return this.delegate().write(operation);
 		}
 
 		@Override
-		public void write(final VoidOperation op)
+		public void write(final VoidOperation operation)
 		{
-			this.delegate().write(op);
+			this.delegate().write(operation);
 		}
 
 	}

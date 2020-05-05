@@ -14,6 +14,10 @@ import one.microstream.demo.bookstore.data.InventoryItem;
 import one.microstream.demo.bookstore.data.Shop;
 import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
 
+/**
+ * View to display {@link InventoryItem}s.
+ *
+ */
 @Route(value = "inventory", layout = RootLayout.class)
 @SuppressWarnings("serial")
 public class ViewInventory extends ViewEntity<InventoryItem> implements HasUrlParameter<String>

@@ -8,29 +8,54 @@ import com.vaadin.flow.data.converter.Converter;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 
+/**
+ * A {@link Converter} that converts from {@link Double} to {@link MonetaryAmount} and back.
+ *
+ */
 @SuppressWarnings("serial")
-public class DoubleToMonetaryAmountConverter implements Converter<Double, MonetaryAmount>
+public interface DoubleToMonetaryAmountConverter extends Converter<Double, MonetaryAmount>
 {
-	public DoubleToMonetaryAmountConverter()
+	/**
+	 * Pseudo-constructor method to create a new {@link DoubleToMonetaryAmountConverter}
+	 * instance with default implementation.
+	 *
+	 * @return a new {@link DoubleToMonetaryAmountConverter}
+	 */
+	public static DoubleToMonetaryAmountConverter New()
 	{
-		super();
+		return new Default();
 	}
 
-	@Override
-	public Result<MonetaryAmount> convertToModel(final Double value, final ValueContext context)
+
+	/**
+	 * Default implementation of the {@link DoubleToMonetaryAmountConverter} interface.
+	 *
+	 */
+	public class Default implements DoubleToMonetaryAmountConverter
 	{
-		return Result.ok(value != null
-			? BookStoreDemo.money(value)
-			: null
-		);
+		Default()
+		{
+			super();
+		}
+
+		@Override
+		public Result<MonetaryAmount> convertToModel(final Double value, final ValueContext context)
+		{
+			return Result.ok(value != null
+				? BookStoreDemo.money(value)
+				: null
+			);
+		}
+
+		@Override
+		public Double convertToPresentation(final MonetaryAmount value, final ValueContext context)
+		{
+			return value != null
+				? value.getNumber().doubleValue()
+				: null
+			;
+		}
+
 	}
 
-	@Override
-	public Double convertToPresentation(final MonetaryAmount value, final ValueContext context)
-	{
-		return value != null
-			? value.getNumber().doubleValue()
-			: null
-		;
-	}
 }

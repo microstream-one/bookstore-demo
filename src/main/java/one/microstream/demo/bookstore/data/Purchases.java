@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toList;
 import static one.microstream.demo.bookstore.util.CollectionUtils.ensureParallelStream;
 import static one.microstream.demo.bookstore.util.CollectionUtils.maxKey;
 import static one.microstream.demo.bookstore.util.CollectionUtils.summingMonetaryAmount;
+import static one.microstream.demo.bookstore.util.LazyUtils.clearIfStored;
 import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetary;
 
 import java.util.ArrayList;
@@ -15,7 +16,6 @@ import java.util.HashSet;
 import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -28,59 +28,219 @@ import com.google.common.collect.Range;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Purchase.Item;
+import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
 import one.microstream.demo.bookstore.util.concurrent.ReadWriteLockedStriped;
+import one.microstream.persistence.types.Persister;
 import one.microstream.reference.Lazy;
-import one.microstream.storage.types.StorageConnection;
+import one.microstream.storage.types.EmbeddedStorageManager;
 
-
+/**
+ * All purchases made by all customers in all stores.
+ * <p>
+ * This type is used to read and write the {@link Purchase}s and statistics thereof.
+ * <p>
+ * All operations on this type are thread safe.
+ *
+ * @see Data#purchases()
+ * @see ReadWriteLocked
+ */
 public interface Purchases
 {
-	public Range<Integer> years();
-
-	public void clear(
-		int year
-	);
-
-	public <T> T computeByYear(int year, Function<Stream<Purchase>, T> streamFunction);
-
-	public <T> T computeByShopAndYear(Shop shop, int year, Function<Stream<Purchase>, T> streamFunction);
-
-	public <T> T computeByShopsAndYear(Predicate<Shop> shopSelector, int year, Function<Stream<Purchase>, T> streamFunction);
-
-	public <T> T computeByEmployeeAndYear(Employee employee, int year, Function<Stream<Purchase>, T> streamFunction);
-
-	public <T> T computeByCustomerAndYear(Customer customer, int year, Function<Stream<Purchase>, T> streamFunction);
-
-	public List<BookSales> bestSellerList(int year);
-
-	public List<BookSales> bestSellerList(int year, Country country);
-
-	public long countPurchasesOfForeigners(int year);
-
-	public List<Purchase> purchasesOfForeigners(int year);
-
-	public long countPurchasesOfForeigners(int year, Country country);
-
-	public List<Purchase> purchasesOfForeigners(int year, Country country);
-
-	public MonetaryAmount revenueOfShopInYear(Shop shop, int year);
-
-	public Employee employeeOfTheYear(int year);
-
-	public Employee employeeOfTheYear(int year, Country country);
-
+	/**
+	 * Adds a new purchase and stores it with the {@link BookStoreDemo}'s {@link EmbeddedStorageManager}.
+	 * <p>
+	 * This is a synonym for:<pre>this.add(purchase, BookStoreDemo.getInstance().storageManager())</pre>
+	 *
+	 * @param purchase the new purchase
+	 */
 	public default void add(final Purchase purchase)
 	{
 		this.add(purchase, BookStoreDemo.getInstance().storageManager());
 	}
 
-	public void add(Purchase purchase, StorageConnection storage);
+	/**
+	 * Adds a new purchase and stores it with the given persister.
+	 *
+	 * @param purchase the new purchase
+	 * @param persister the persister to store it with
+	 * @see #add(Purchase)
+	 */
+	public void add(Purchase purchase, Persister persister);
+
+	/**
+	 * Gets the range of all years in which purchases were made.
+	 *
+	 * @return all years with revenue
+	 */
+	public Range<Integer> years();
+
+	/**
+	 * Clears all {@link Lazy} references regarding all purchases.
+	 * This frees the used memory but you do not lose the persisted data. It is loaded again on demand.
+	 *
+	 * @see #clear(int)
+	 */
+	public void clear();
+
+	/**
+	 * Clears all {@link Lazy} references regarding purchases of a specific year.
+	 * This frees the used memory but you do not lose the persisted data. It is loaded again on demand.
+	 *
+	 * @param year the year to clear
+	 * @see #clear()
+	 */
+	public void clear(int year);
+
+	/**
+	 * Executes a function with a pre-filtered {@link Stream} of {@link Purchase}s and returns the computed value.
+	 *
+	 * @param <T> the return type
+	 * @param year year to filter by
+	 * @param streamFunction computing function
+	 * @return the computed result
+	 */
+	public <T> T computeByYear(int year, Function<Stream<Purchase>, T> streamFunction);
+
+	/**
+	 * Executes a function with a pre-filtered {@link Stream} of {@link Purchase}s and returns the computed value.
+	 *
+	 * @param <T> the return type
+	 * @param shop shop to filter by
+	 * @param year year to filter by
+	 * @param streamFunction computing function
+	 * @return the computed result
+	 */
+	public <T> T computeByShopAndYear(Shop shop, int year, Function<Stream<Purchase>, T> streamFunction);
+
+	/**
+	 * Executes a function with a pre-filtered {@link Stream} of {@link Purchase}s and returns the computed value.
+	 *
+	 * @param <T> the return type
+	 * @param shopSelector predicate for shops to filter by
+	 * @param year year to filter by
+	 * @param streamFunction computing function
+	 * @return the computed result
+	 */
+	public <T> T computeByShopsAndYear(Predicate<Shop> shopSelector, int year, Function<Stream<Purchase>, T> streamFunction);
+
+	/**
+	 * Executes a function with a pre-filtered {@link Stream} of {@link Purchase}s and returns the computed value.
+	 *
+	 * @param <T> the return type
+	 * @param employee employee to filter by
+	 * @param year year to filter by
+	 * @param streamFunction computing function
+	 * @return the computed result
+	 */
+	public <T> T computeByEmployeeAndYear(Employee employee, int year, Function<Stream<Purchase>, T> streamFunction);
+
+	/**
+	 * Executes a function with a pre-filtered {@link Stream} of {@link Purchase}s and returns the computed value.
+	 *
+	 * @param <T> the return type
+	 * @param customer customer to filter by
+	 * @param year year to filter by
+	 * @param streamFunction computing function
+	 * @return the computed result
+	 */
+	public <T> T computeByCustomerAndYear(Customer customer, int year, Function<Stream<Purchase>, T> streamFunction);
+
+	/**
+	 * Computes the best selling books for a specific year.
+	 *
+	 * @param year the year to filter by
+	 * @return list of best selling books
+	 */
+	public List<BookSales> bestSellerList(int year);
+
+	/**
+	 * Computes the best selling books for a specific year and country.
+	 *
+	 * @param year the year to filter by
+	 * @param country the country to filter by
+	 * @return list of best selling books
+	 */
+	public List<BookSales> bestSellerList(int year, Country country);
+
+	/**
+	 * Counts all purchases which were made by customers in foreign countries.
+	 *
+	 * @param year the year to filter by
+	 * @return the amount of computed purchases
+	 */
+	public long countPurchasesOfForeigners(int year);
+
+	/**
+	 * Computes all purchases which were made by customers in foreign countries.
+	 *
+	 * @param year the year to filter by
+	 * @return a list of purchases
+	 */
+	public List<Purchase> purchasesOfForeigners(int year);
+
+	/**
+	 * Counts all purchases which were made by customers in foreign cities.
+	 *
+	 * @param year the year to filter by
+	 * @param country the country to filter by
+	 * @return the amount of computed purchases
+	 */
+	public long countPurchasesOfForeigners(int year, Country country);
+
+	/**
+	 * Computes all purchases which were made by customers in foreign cities.
+	 *
+	 * @param year the year to filter by
+	 * @param country the country to filter by
+	 * @return a list of purchases
+	 */
+	public List<Purchase> purchasesOfForeigners(int year, Country country);
+
+	/**
+	 * Computes the complete revenue of a specific shop in a whole year.
+	 *
+	 * @param shop the shop to filter by
+	 * @param year the year to filter by
+	 * @return complete revenue
+	 */
+	public MonetaryAmount revenueOfShopInYear(Shop shop, int year);
+
+	/**
+	 * Computes the worldwide best performing employee in a specific year.
+	 *
+	 * @param year the year to filter by
+	 * @return the employee which made the most revenue
+	 */
+	public Employee employeeOfTheYear(int year);
+
+	/**
+	 * Computes the best performing employee in a specific year.
+	 *
+	 * @param year the year to filter by
+	 * @param country the country to filter by
+	 * @return the employee which made the most revenue
+	 */
+	public Employee employeeOfTheYear(int year, Country country);
 
 
+	/**
+	 * Default implementation of the {@link Purchases} interface.
+	 * <p>
+	 * It utilizes a {@link ReadWriteLockedStriped.Scope} to ensure thread safe reads and writes.
+	 */
 	public static class Default extends ReadWriteLockedStriped.Scope implements Purchases
 	{
+		/**
+		 * This class hold all purchases made in a specific year.
+		 * <p>
+		 * Note that this class doesn't need to handle concurrency in any way,
+		 * since it is only used by the {@link Default} implementation which handles thread safety.
+		 */
 		static class YearlyPurchases
 		{
+			/*
+			 * Multiple maps holding references to the purchases, for a faster lookup.
+			 */
 			final Map<Shop,     Lazy<List<Purchase>>> shopToPurchases     = new HashMap<>(128);
 			final Map<Employee, Lazy<List<Purchase>>> employeeToPurchases = new HashMap<>(512);
 			final Map<Customer, Lazy<List<Purchase>>> customerToPurchases = new HashMap<>(1024);
@@ -90,6 +250,11 @@ public interface Purchases
 				super();
 			}
 
+			/**
+			 * Adds a purchase to all collections used by this class.
+			 *
+			 * @param purchase the purchase to add
+			 */
 			YearlyPurchases add(
 				final Purchase purchase
 			)
@@ -100,6 +265,15 @@ public interface Purchases
 				return this;
 			}
 
+			/**
+			 * Adds a purchase to a map with a list as values.
+			 * If no list is present for the given key, it will be created.
+			 *
+			 * @param <K> the key type
+			 * @param map the collection
+			 * @param key the key
+			 * @param purchase the purchase to add
+			 */
 			private static <K> void addToMap(
 				final Map<K, Lazy<List<Purchase>>> map,
 				final K key,
@@ -111,6 +285,9 @@ public interface Purchases
 					.add(purchase);
 			}
 
+			/**
+			 * Clears all {@link Lazy} references used by this type
+			 */
 			void clear()
 			{
 				clearMap(this.shopToPurchases);
@@ -118,15 +295,25 @@ public interface Purchases
 				clearMap(this.customerToPurchases);
 			}
 
+			/**
+			 * Clears all {@link Lazy} references in the given map.
+			 *
+			 * @param <K> the key type
+			 * @param map the map to clear
+			 */
 			private static <K> void clearMap(
 				final Map<K, Lazy<List<Purchase>>> map
 			)
 			{
 				map.values().forEach(lazy ->
-					Optional.ofNullable(lazy.clear()).ifPresent(List::clear)
+					clearIfStored(lazy).ifPresent(List::clear)
 				);
 			}
 
+			/**
+			 * @param shop the shop to filter by
+			 * @return parallel stream with purchases made in a specific shop
+			 */
 			Stream<Purchase> byShop(
 				final Shop shop
 			)
@@ -136,6 +323,10 @@ public interface Purchases
 				);
 			}
 
+			/**
+			 * @param shopSelector the predicate to filter by
+			 * @return parallel stream with purchases made in specific shops
+			 */
 			Stream<Purchase> byShops(
 				final Predicate<Shop> shopSelector
 			)
@@ -145,6 +336,10 @@ public interface Purchases
 					.flatMap(e -> ensureParallelStream(Lazy.get(e.getValue())));
 			}
 
+			/**
+			 * @param employee the employee to filter by
+			 * @return parallel stream with purchases made by a specific employee
+			 */
 			Stream<Purchase> byEmployee(
 				final Employee employee
 			)
@@ -154,6 +349,10 @@ public interface Purchases
 				);
 			}
 
+			/**
+			 * @param customer the customer to filter by
+			 * @return parallel stream with purchases made by a specific customer
+			 */
 			Stream<Purchase> byCustomer(
 				final Customer customer
 			)
@@ -166,6 +365,9 @@ public interface Purchases
 		}
 
 
+		/**
+		 * Map with {@link YearlyPurchases}, indexed by the year, of course.
+		 */
 		private final Map<Integer, Lazy<YearlyPurchases>> yearlyPurchases = new ConcurrentHashMap<>(32);
 
 		Default()
@@ -173,37 +375,14 @@ public interface Purchases
 			super();
 		}
 
-		@Override
-		public void add(
-			final Purchase purchase,
-			final StorageConnection storage
-		)
-		{
-			final Integer year = purchase.timestamp().getYear();
-			this.write(year, () ->
-			{
-				final Lazy<YearlyPurchases> lazy = this.yearlyPurchases.get(year);
-				if(lazy != null)
-				{
-					storage.store(lazy.get().add(purchase));
-				}
-				else
-				{
-					this.yearlyPurchases.put(
-						year,
-						Lazy.Reference(
-							new YearlyPurchases().add(purchase)
-						)
-					);
-					storage.store(this.yearlyPurchases);
-				}
-			});
-		}
-
+		/**
+		 * This method is used exclusively by the {@link RandomDataGenerator}
+		 * and it's not published by the {@link Purchases} interface.
+		 */
 		Set<Customer> init(
 			final int year,
 			final List<Purchase> purchases,
-			final StorageConnection storage
+			final Persister persister
 		)
 		{
 			return this.write(year, () ->
@@ -214,7 +393,7 @@ public interface Purchases
 				final Lazy<YearlyPurchases> lazy = Lazy.Reference(yearlyPurchases);
 				this.yearlyPurchases.put(year, lazy);
 
-				storage.store(this.yearlyPurchases);
+				persister.store(this.yearlyPurchases);
 
 				final Set<Customer> customers = new HashSet<>(yearlyPurchases.customerToPurchases.keySet());
 
@@ -226,27 +405,63 @@ public interface Purchases
 		}
 
 		@Override
-		public void clear(
-			final int year
+		public void add(
+			final Purchase purchase,
+			final Persister persister
 		)
 		{
+			final Integer year = purchase.timestamp().getYear();
 			this.write(year, () ->
 			{
 				final Lazy<YearlyPurchases> lazy = this.yearlyPurchases.get(year);
-				if(lazy != null && lazy.isStored())
+				if(lazy != null)
 				{
-					Optional.ofNullable(lazy.clear()).ifPresent(YearlyPurchases::clear);
+					persister.store(lazy.get().add(purchase));
+				}
+				else
+				{
+					this.write(0, () -> {
+						this.yearlyPurchases.put(
+							year,
+							Lazy.Reference(
+								new YearlyPurchases().add(purchase)
+							)
+						);
+						persister.store(this.yearlyPurchases);
+					});
 				}
 			});
 		}
 
 		@Override
+		public void clear()
+		{
+			final List<Integer> years = this.read(0, () ->
+				new ArrayList<>(this.yearlyPurchases.keySet())
+			);
+			years.forEach(this::clear);
+		}
+
+		@Override
+		public void clear(
+			final int year
+		)
+		{
+			this.write(year, () ->
+				clearIfStored(this.yearlyPurchases.get(year))
+					.ifPresent(YearlyPurchases::clear)
+			);
+		}
+
+		@Override
 		public Range<Integer> years()
 		{
-			final IntSummaryStatistics summary = this.yearlyPurchases.keySet().stream()
-				.mapToInt(Integer::intValue)
-				.summaryStatistics();
-			return Range.closed(summary.getMin(), summary.getMax());
+			return this.read(0, () -> {
+				final IntSummaryStatistics summary = this.yearlyPurchases.keySet().stream()
+					.mapToInt(Integer::intValue)
+					.summaryStatistics();
+				return Range.closed(summary.getMin(), summary.getMax());
+			});
 		}
 
 		@Override

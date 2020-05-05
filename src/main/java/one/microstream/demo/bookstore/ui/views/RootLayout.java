@@ -19,6 +19,10 @@ import com.vaadin.flow.server.PageConfigurator;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
+/**
+ * Root layout for all views, containing the main menu.
+ *
+ */
 @Push
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @CssImport("./styles/shared-styles.css")

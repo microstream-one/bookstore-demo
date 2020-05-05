@@ -22,9 +22,14 @@ import com.vaadin.flow.router.Route;
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Customer;
 import one.microstream.demo.bookstore.data.Purchase;
+import one.microstream.demo.bookstore.data.Purchases;
 import one.microstream.demo.bookstore.data.Shop;
 import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
 
+/**
+ * View to display {@link Purchases}.
+ *
+ */
 @Route(value = "purchases", layout = RootLayout.class)
 @SuppressWarnings("serial")
 public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParameter<String>

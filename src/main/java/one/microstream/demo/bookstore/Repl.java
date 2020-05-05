@@ -24,7 +24,11 @@ import one.microstream.exceptions.IORuntimeException;
 import picocli.CommandLine;
 import picocli.shell.jline3.PicocliCommands;
 
-
+/**
+ * Read-eval-print loop which utilizes <a href="https://github.com/jline/jline3">JLine</a>
+ * and <a href="https://picocli.info/">picocli</a>.
+ *
+ */
 public class Repl implements Runnable
 {
 	private final BookStoreDemo bookStoreDemo;

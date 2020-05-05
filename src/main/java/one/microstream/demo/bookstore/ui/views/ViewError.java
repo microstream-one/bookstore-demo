@@ -11,6 +11,10 @@ import com.vaadin.flow.router.Route;
 
 import one.microstream.chars.XChars;
 
+/**
+ * Generic view for internal server errors.
+ *
+ */
 @Route(value = "error", layout = RootLayout.class)
 @SuppressWarnings("serial")
 public class ViewError extends VerticalLayout implements HasErrorParameter<Exception>

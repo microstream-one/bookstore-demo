@@ -6,6 +6,10 @@ import com.vaadin.flow.router.Route;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 
+/**
+ * Landing page of the web interface.
+ *
+ */
 @Route(value = "", layout = RootLayout.class)
 @SuppressWarnings("serial")
 public class ViewMain extends VerticalLayout

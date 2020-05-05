@@ -8,6 +8,9 @@ import one.microstream.demo.bookstore.data.RandomDataAmount;
 @Configuration
 public class VaadinApplicationConfiguration
 {
+	/**
+	 * Manages the creation and disposal of the {@link BookStoreDemo} singleton.
+	 */
 	@Bean(destroyMethod = "shutdown")
 	public BookStoreDemo getBookStoreDemo()
 	{

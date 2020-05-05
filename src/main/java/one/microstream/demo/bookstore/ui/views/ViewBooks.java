@@ -11,8 +11,13 @@ import com.vaadin.flow.router.Route;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Book;
+import one.microstream.demo.bookstore.data.Books;
 import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
 
+/**
+ * View to display and modify {@link Books}.
+ *
+ */
 @Route(value = "books", layout = RootLayout.class)
 @SuppressWarnings("serial")
 public class ViewBooks extends ViewEntity<Book>

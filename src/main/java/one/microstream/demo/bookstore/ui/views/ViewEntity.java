@@ -26,6 +26,12 @@ import com.vaadin.flow.function.ValueProvider;
 import one.microstream.demo.bookstore.data.Named;
 import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider;
 
+/**
+ * Abstract view to display entities in a {@link Grid}.
+ *
+ * @param <E> the entity type
+ */
+@SuppressWarnings("serial")
 public abstract class ViewEntity<E> extends VerticalLayout
 {
 	final Grid<E>                 grid;

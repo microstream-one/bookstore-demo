@@ -1,10 +1,18 @@
 package one.microstream.demo.bookstore.ui.views;
 
+import static one.microstream.X.notNull;
+
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 
+/**
+ * Filter {@link TextField} for arbitrary entities.
+ *
+ * @param <E> the entity type
+ */
+@SuppressWarnings("serial")
 public class FilterTextField<E> extends TextField implements FilterField<E, String>
 {
 	private final SerializableFunction<String, SerializablePredicate<E>> filterFactory;
@@ -15,7 +23,7 @@ public class FilterTextField<E> extends TextField implements FilterField<E, Stri
 	{
 		super();
 
-		this.filterFactory = filterFactory;
+		this.filterFactory = notNull(filterFactory);
 
 		this.setPlaceholder("Filter");
 		this.setClearButtonVisible(true);

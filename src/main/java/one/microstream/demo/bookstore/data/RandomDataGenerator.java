@@ -29,6 +29,12 @@ import com.github.javafaker.Faker;
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.storage.types.EmbeddedStorageManager;
 
+/**
+ * Random data generator for the {@link BookStoreDemo}'s {@link Data} root.
+ * <p>
+ * Data amount boundaries can be controlled with {@link RandomDataAmount}.
+ *
+ */
 public interface RandomDataGenerator extends HasLogger
 {
 	public DataMetrics generate();

@@ -1,37 +1,41 @@
 
 package one.microstream.demo.bookstore.data;
 
+/**
+ * Data amount boundaries for the {@link RandomDataGenerator}.
+ *
+ */
 public interface RandomDataAmount
 {
 	public double minRatio();
-	
+
 	public int maxGenres();
-	
+
 	public int maxCountries();
-	
+
 	public int maxPublishersPerCountry();
-	
+
 	public int maxAuthorsPerCountry();
-	
+
 	public int maxBooksPerCountry();
-	
+
 	public int maxCitiesPerCountry();
-	
+
 	public int maxCustomersPerCity();
-	
+
 	public int maxShopsPerCity();
-	
+
 	public int maxBooksPerShop();
-	
+
 	public int maxAgeOfShopsInYears();
-	
+
 	public int maxEmployeesPerShop();
-	
+
 	public int maxPurchasesPerEmployeePerYear();
-	
+
 	public int maxItemsPerPurchase();
-	
-	
+
+
 	public static RandomDataAmount valueOf(final String name)
 	{
 		switch(name.toLowerCase())
@@ -42,12 +46,12 @@ public interface RandomDataAmount
 			case "large"    : return Large();
 			case "humongous": return Humongous();
 		}
-		
-		throw new IllegalArgumentException("Invalid data amount: " + name 
+
+		throw new IllegalArgumentException("Invalid data amount: " + name
 			+ ", supported values: minimal, small, medium, large, humongous");
 	}
-	
-	
+
+
 	public static RandomDataAmount Minimal()
 	{
 		return new Default(
@@ -67,7 +71,7 @@ public interface RandomDataAmount
 			1 // maxItemsPerPurchase
 		);
 	}
-	
+
 	public static RandomDataAmount Small()
 	{
 		return new Default(
@@ -87,7 +91,7 @@ public interface RandomDataAmount
 			3 // maxItemsPerPurchase
 		);
 	}
-	
+
 	public static RandomDataAmount Medium()
 	{
 		return new Default(
@@ -107,7 +111,7 @@ public interface RandomDataAmount
 			3 // maxItemsPerPurchase
 		);
 	}
-	
+
 	public static RandomDataAmount Large()
 	{
 		return new Default(
@@ -127,7 +131,7 @@ public interface RandomDataAmount
 			3 // maxItemsPerPurchase
 		);
 	}
-	
+
 	public static RandomDataAmount Humongous()
 	{
 		return new Default(
@@ -147,7 +151,7 @@ public interface RandomDataAmount
 			3 // maxItemsPerPurchase
 		);
 	}
-	
+
 	public static class Default implements RandomDataAmount
 	{
 		private final double minRatio;
@@ -164,7 +168,7 @@ public interface RandomDataAmount
 		private final int    maxEmployeesPerShop;
 		private final int    maxPurchasesPerEmployeePerYear;
 		private final int    maxItemsPerPurchase;
-		
+
 		Default(
 			final double minRatio,
 			final int maxGenres,
@@ -198,91 +202,91 @@ public interface RandomDataAmount
 			this.maxPurchasesPerEmployeePerYear = maxPurchasesPerEmployeePerYear;
 			this.maxItemsPerPurchase            = maxItemsPerPurchase;
 		}
-		
+
 		@Override
 		public double minRatio()
 		{
 			return this.minRatio;
 		}
-		
+
 		@Override
 		public int maxGenres()
 		{
 			return this.maxGenres;
 		}
-		
+
 		@Override
 		public int maxCountries()
 		{
 			return this.maxCountries;
 		}
-		
+
 		@Override
 		public int maxPublishersPerCountry()
 		{
 			return this.maxPublishersPerCountry;
 		}
-		
+
 		@Override
 		public int maxAuthorsPerCountry()
 		{
 			return this.maxAuthorsPerCountry;
 		}
-		
+
 		@Override
 		public int maxBooksPerCountry()
 		{
 			return this.maxBooksPerCountry;
 		}
-		
+
 		@Override
 		public int maxCitiesPerCountry()
 		{
 			return this.maxCitiesPerCountry;
 		}
-		
+
 		@Override
 		public int maxCustomersPerCity()
 		{
 			return this.maxCustomersPerCity;
 		}
-		
+
 		@Override
 		public int maxShopsPerCity()
 		{
 			return this.maxShopsPerCity;
 		}
-		
+
 		@Override
 		public int maxBooksPerShop()
 		{
 			return this.maxBooksPerShop;
 		}
-		
+
 		@Override
 		public int maxAgeOfShopsInYears()
 		{
 			return this.maxAgeOfShopsInYears;
 		}
-		
+
 		@Override
 		public int maxEmployeesPerShop()
 		{
 			return this.maxEmployeesPerShop;
 		}
-		
+
 		@Override
 		public int maxPurchasesPerEmployeePerYear()
 		{
 			return this.maxPurchasesPerEmployeePerYear;
 		}
-		
+
 		@Override
 		public int maxItemsPerPurchase()
 		{
 			return this.maxItemsPerPurchase;
 		}
-		
+
 	}
-	
+
 }

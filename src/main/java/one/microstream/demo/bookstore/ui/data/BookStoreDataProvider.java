@@ -1,35 +1,68 @@
 package one.microstream.demo.bookstore.ui.data;
 
+import static one.microstream.X.notNull;
+
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.data.provider.AbstractDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 
+import one.microstream.demo.bookstore.BookStoreDemo;
+
+/**
+ * Vaadin {@link DataProvider} backed by streaming function, which fetches data from the
+ * {@link BookStoreDemo}.
+ *
+ * @param <T> the entity type
+ */
 public interface BookStoreDataProvider<T> extends InMemoryDataProvider<T>
 {
+	/**
+	 * Backend function which computes results based on a {@link Stream}.
+	 *
+	 * @param <T> the entity type
+	 */
 	@FunctionalInterface
-	public static interface Backend<T>
+	public static interface Backend<T> extends Serializable
 	{
-		public <R> R compute(Function<Stream<T>, R> function);
+		public <R> R compute(SerializableFunction<Stream<T>, R> function);
 	}
 
 
+	/**
+	 * Pseudo-constructor method to create a new {@link BookStoreDataProvider}
+	 * instance with default implementation.
+	 *
+	 * @param <T> the entity type
+	 * @param backend the backend function
+	 * @return a new {@link BookStoreDataProvider} instance
+	 */
 	public static <T> BookStoreDataProvider<T> New(
 		final Backend<T> backend
 	)
 	{
-		return new Default<>(backend);
+		return new Default<>(
+			notNull(backend)
+		);
 	}
 
 
+	/**
+	 * Default implementation of the {@link BookStoreDataProvider} interface.
+	 *
+	 * @param <T> the entity type
+	 */
+	@SuppressWarnings("serial")
 	public static class Default<T>
 		extends AbstractDataProvider<T, SerializablePredicate<T>>
 		implements BookStoreDataProvider<T>

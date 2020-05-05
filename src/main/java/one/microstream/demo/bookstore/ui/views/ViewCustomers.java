@@ -11,8 +11,13 @@ import com.vaadin.flow.router.Route;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Customer;
+import one.microstream.demo.bookstore.data.Customers;
 import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
 
+/**
+ * View to display {@link Customers}.
+ *
+ */
 @Route(value = "customers", layout = RootLayout.class)
 @SuppressWarnings("serial")
 public class ViewCustomers extends ViewNamedWithAddress<Customer>

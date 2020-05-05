@@ -1,5 +1,6 @@
 package one.microstream.demo.bookstore.ui.views;
 
+import static one.microstream.X.notNull;
 import static one.microstream.demo.bookstore.ui.data.DataBindingUtils.setterDummy;
 import static one.microstream.demo.bookstore.ui.data.DataBindingUtils.validator;
 
@@ -29,14 +30,28 @@ import one.microstream.demo.bookstore.data.Language;
 import one.microstream.demo.bookstore.data.Publisher;
 import one.microstream.demo.bookstore.ui.data.DoubleToMonetaryAmountConverter;
 
+/**
+ * {@link Dialog} to create a new {@link Book}.
+ *
+ * @see #open(Consumer)
+ *
+ */
 @SuppressWarnings("serial")
 public class DialogBookCreate extends Dialog
 {
+	/**
+	 * Opens a new dialog and triggers the {@code successHandler}
+	 * when the user approved and validation was OK.
+	 *
+	 * @param successHandler
+	 */
 	public static void open(
 		final Consumer<Book> successHandler
 	)
 	{
-		new DialogBookCreate(successHandler).open();
+		new DialogBookCreate(
+			notNull(successHandler)
+		).open();
 	}
 
 
@@ -101,7 +116,7 @@ public class DialogBookCreate extends Dialog
 			.bind(Book::language, setterDummy());
 		binder.forField(purchasePriceField)
 			.asRequired()
-			.withConverter(new DoubleToMonetaryAmountConverter())
+			.withConverter(DoubleToMonetaryAmountConverter.New())
 			.withValidator(validator(Book.Validation::validatePrice))
 			.bind(Book::purchasePrice, setterDummy());
 
