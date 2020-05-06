@@ -23,9 +23,9 @@ Then open [http://localhost:8080/](http://localhost:8080/)
 ## Description
 
 The MicroStream BookStore Demo is a fully fledged sample application.
-It shows how to design an application with MicroStream from ground up.
+It shows how to design an application with MicroStream from the ground up.
 
-A company which operates book stores around the world is modeled.
+A company which operates book stores around the world is modelled.
 From the data root on there are four main domains:
 
 - [Books](./src/main/java/one/microstream/demo/bookstore/data/Books.java): range of all books sold by the company
