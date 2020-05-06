@@ -4,8 +4,6 @@ import static one.microstream.demo.bookstore.BookStoreDemo.monetaryAmountFormat;
 import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetary;
 
 import java.time.Year;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -54,20 +52,21 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 	@Override
 	public void setParameter(
 		final BeforeEvent event,
-		@OptionalParameter final String parameter)
+		@OptionalParameter final String parameter
+	)
 	{
-		final Map<String, List<String>> params = event.getLocation().getQueryParameters().getParameters();
-		final List<String> shopParams = params.get("shop");
-		if(shopParams != null && shopParams.size() == 1)
+		final String shopParam = getQueryParameter(event, "shop");
+		if(shopParam != null)
 		{
-			this.shop = BookStoreDemo.getInstance().data().shops().ofName(shopParams.get(0));
+			this.shop = BookStoreDemo.getInstance().data().shops().ofName(shopParam);
 		}
-		final List<String> customerParams = params.get("customer");
-		if(customerParams != null && customerParams.size() == 1)
+
+		final String customerParam = getQueryParameter(event, "customer");
+		if(customerParam != null)
 		{
 			try
 			{
-				final int customerId = Integer.parseInt(customerParams.get(0));
+				final int customerId = Integer.parseInt(customerParam);
 				this.customer = BookStoreDemo.getInstance().data().customers().ofId(customerId);
 			}
 			catch(final NumberFormatException e)
@@ -111,14 +110,14 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 
 	private Component createPurchaseDetails(final Purchase purchase)
 	{
-		final Grid<Purchase.Item> grid = this.createGrid();
-		addGridColumn(grid, this.getTranslation("isbn13")   , item -> item.book().isbn13()           );
-		addGridColumn(grid, this.getTranslation("book")     , item -> item.book().title()            );
-		addGridColumn(grid, this.getTranslation("author")   , item -> item.book().author().name()    );
-		addGridColumn(grid, this.getTranslation("publisher"), item -> item.book().publisher().name() );
-		addGridColumn(grid, this.getTranslation("price")    , moneyRenderer(Item::price)             );
-		addGridColumn(grid, this.getTranslation("amount")   , Item::amount                           );
-		addGridColumn(grid, this.getTranslation("total")    , moneyRenderer(Item::itemTotal)         );
+		final Grid<Purchase.Item> grid = createGrid();
+		addGridColumn(grid, this.getTranslation("isbn13")   , item -> item.book().isbn13()          );
+		addGridColumn(grid, this.getTranslation("book")     , item -> item.book().title()           );
+		addGridColumn(grid, this.getTranslation("author")   , item -> item.book().author().name()   );
+		addGridColumn(grid, this.getTranslation("publisher"), item -> item.book().publisher().name());
+		addGridColumn(grid, this.getTranslation("price")    , moneyRenderer(Item::price)            );
+		addGridColumn(grid, this.getTranslation("amount")   , Item::amount                          );
+		addGridColumn(grid, this.getTranslation("total")    , moneyRenderer(Item::itemTotal)        );
 		grid.setDataProvider(DataProvider.fromStream(purchase.items()));
 		grid.setHeightByRows(true);
 		return grid;

@@ -28,6 +28,7 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.router.BeforeEvent;
 
 import one.microstream.demo.bookstore.data.Named;
 import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider;
@@ -49,7 +50,7 @@ public abstract class ViewEntity<E> extends VerticalLayout
 	{
 		super();
 
-		this.grid = this.createGrid();
+		this.grid = createGrid();
 
 		this.filterFields = new ArrayList<>();
 
@@ -66,7 +67,7 @@ public abstract class ViewEntity<E> extends VerticalLayout
 		});
 	}
 
-	protected <T> Grid<T> createGrid()
+	protected static <T> Grid<T> createGrid()
 	{
 		final Grid<T> grid = new Grid<>();
 		grid.setMultiSort(true);
@@ -310,6 +311,17 @@ public abstract class ViewEntity<E> extends VerticalLayout
 				valueProvider.apply(entity)
 			)
 		);
+	}
+
+	protected static String getQueryParameter(
+		final BeforeEvent event,
+		final String name
+	)
+	{
+		final List<String> list = event.getLocation().getQueryParameters().getParameters().get(name);
+		return list != null && list.size() == 1
+			? list.get(0)
+			: null;
 	}
 
 }

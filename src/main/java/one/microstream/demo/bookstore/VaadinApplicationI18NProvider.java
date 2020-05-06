@@ -13,11 +13,21 @@ import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.i18n.I18NProvider;
 
+/**
+ * I18N provider for Vaadin
+ *
+ */
 @Component
 @SuppressWarnings("serial")
 public class VaadinApplicationI18NProvider implements I18NProvider
 {
-	private final Map<Locale, ResourceBundle> bundles = new HashMap<>();
+	private final String                      bundleBaseName  = "META-INF/resources/frontend/i18n/i18n";
+	private final List<Locale>                providedLocales = Arrays.asList(
+		Locale.ENGLISH,
+		Locale.GERMAN,
+		new Locale("es")
+	);
+	private final Map<Locale, ResourceBundle> bundles         = new HashMap<>();
 
 	public VaadinApplicationI18NProvider()
 	{
@@ -27,35 +37,43 @@ public class VaadinApplicationI18NProvider implements I18NProvider
 	@Override
 	public List<Locale> getProvidedLocales()
 	{
-		return Arrays.asList(Locale.ENGLISH);
+		return this.providedLocales;
 	}
 
 	@Override
-	public String getTranslation(final String key, final Locale locale, final Object... params)
+	public String getTranslation(
+		final String key,
+		final Locale locale,
+		final Object... params
+	)
 	{
-		final ResourceBundle bundle = this.bundles.computeIfAbsent(locale, language ->
-			ResourceBundle.getBundle(
-				"META-INF/resources/frontend/i18n/i18n",
-				language,
-				VaadinApplicationI18NProvider.class.getClassLoader()
-			)
-		);
-
-		String value;
 		try
 		{
-			value = bundle.getString(key);
+			final ResourceBundle bundle = this.bundles.computeIfAbsent(
+				locale,
+				this::createBundle
+			);
+			final String         value  = bundle.getString(key);
+			return params.length > 0
+				? MessageFormat.format(value, params)
+				: value
+			;
 		}
 		catch(final MissingResourceException e)
 		{
-			return "!" + locale.getLanguage() + ": " + key;
+			return "!{" + locale.getLanguage() + ": " + key + "}";
 		}
-
-		if(params.length > 0)
-		{
-			value = MessageFormat.format(value, params);
-		}
-
-		return value;
 	}
+
+	private ResourceBundle createBundle(
+		final Locale language
+	)
+	{
+		return ResourceBundle.getBundle(
+			this.bundleBaseName,
+			language,
+			this.getClass().getClassLoader()
+		);
+	}
+
 }

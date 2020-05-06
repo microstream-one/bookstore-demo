@@ -1,8 +1,5 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import java.util.List;
-import java.util.Map;
-
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
@@ -33,18 +30,19 @@ public class ViewInventory extends ViewEntity<InventoryItem> implements HasUrlPa
 	@Override
 	public void setParameter(
 		final BeforeEvent event,
-		@OptionalParameter final String parameter)
+		@OptionalParameter final String parameter
+	)
 	{
-		final Map<String, List<String>> params = event.getLocation().getQueryParameters().getParameters();
-		final List<String> shopParams = params.get("shop");
-		if(shopParams != null && shopParams.size() == 1)
+		final String shopParam = getQueryParameter(event, "shop");
+		if(shopParam != null)
 		{
-			this.shop = BookStoreDemo.getInstance().data().shops().ofName(shopParams.get(0));
+			this.shop = BookStoreDemo.getInstance().data().shops().ofName(shopParam);
 		}
-		final List<String> bookParams = params.get("book");
-		if(bookParams != null && bookParams.size() == 1)
+
+		final String bookParam = getQueryParameter(event, "book");
+		if(bookParam != null)
 		{
-			this.book = BookStoreDemo.getInstance().data().books().ofIsbn13(bookParams.get(0));
+			this.book = BookStoreDemo.getInstance().data().books().ofIsbn13(bookParam);
 		}
 	}
 
