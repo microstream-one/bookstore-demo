@@ -15,7 +15,7 @@ import one.microstream.storage.types.EmbeddedStorageManager;
 /**
  * All retail shops operated by this company.
  * <p>
- * This type is used to read and write the {@link Shop}s and their {@link Inventory}s.
+ * This type is used to read and write the {@link Shop}s, their {@link Employee}s and {@link Inventory}s.
  * <p>
  * All operations on this type are thread safe.
  *
