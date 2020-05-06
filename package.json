@@ -1,6 +1,6 @@
 {
   "name": "no-name",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "dependencies": {
     "@polymer/polymer": "3.2.0",
     "@webcomponents/webcomponentsjs": "^2.2.10",

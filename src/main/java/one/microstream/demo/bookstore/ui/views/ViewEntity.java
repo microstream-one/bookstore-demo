@@ -20,6 +20,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 
@@ -79,6 +80,8 @@ public abstract class ViewEntity<E> extends VerticalLayout
 	protected final void refresh()
 	{
 		this.dataProvider.refreshAll();
+
+		this.gridDataUpdated();
 	}
 
 	protected final void updateFilter()
@@ -91,6 +94,12 @@ public abstract class ViewEntity<E> extends VerticalLayout
 		this.dataProvider.setFilter(filter);
 
 		this.filterFields.forEach(this::refreshIfDynamic);
+
+		this.gridDataUpdated();
+	}
+
+	protected void gridDataUpdated()
+	{
 	}
 
 	protected Grid.Column<E> addGridColumn(
@@ -108,6 +117,26 @@ public abstract class ViewEntity<E> extends VerticalLayout
 	)
 	{
 		return grid.addColumn(valueProvider)
+			.setHeader(title)
+			.setResizable(true)
+			.setSortable(true);
+	}
+
+	protected Grid.Column<E> addGridColumn(
+		final String title,
+		final Renderer<E> renderer
+	)
+	{
+		return addGridColumn(this.grid, title, renderer);
+	}
+
+	protected static <T> Grid.Column<T> addGridColumn(
+		final Grid<T> grid,
+		final String title,
+		final Renderer<T> renderer
+	)
+	{
+		return grid.addColumn(renderer)
 			.setHeader(title)
 			.setResizable(true)
 			.setSortable(true);

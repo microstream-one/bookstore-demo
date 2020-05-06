@@ -9,8 +9,12 @@ import java.util.Locale;
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
+import javax.money.format.AmountFormatQueryBuilder;
+import javax.money.format.MonetaryAmountFormat;
+import javax.money.format.MonetaryFormats;
 
 import org.javamoney.moneta.RoundedMoney;
+import org.javamoney.moneta.format.CurrencyStyle;
 import org.rapidpm.dependencies.core.logger.HasLogger;
 import org.springframework.boot.SpringApplication;
 
@@ -51,12 +55,22 @@ public final class BookStoreDemo implements HasLogger
 	/**
 	 * {@link CurrencyUnit} for this demo, US Dollar is used as only currency.
 	 */
-	private static final CurrencyUnit CURRENCY_UNIT       = Monetary.getCurrency(Locale.US);
+	private static final CurrencyUnit         CURRENCY_UNIT          = Monetary.getCurrency(Locale.US);
+
+	/**
+	 * Money format
+	 */
+	private final static MonetaryAmountFormat MONETARY_AMOUNT_FORMAT = MonetaryFormats.getAmountFormat(
+		AmountFormatQueryBuilder.of(Locale.getDefault())
+			.set(CurrencyStyle.SYMBOL)
+			.build()
+	);
 
 	/**
 	 * Multiplicant used to calculate retail prices, adds an 11% margin.
 	 */
-	private final static BigDecimal   RETAIL_MULTIPLICANT = scale(new BigDecimal(1.11));
+	private final static BigDecimal           RETAIL_MULTIPLICANT    = scale(new BigDecimal(1.11));
+
 
 	private static BigDecimal scale(final BigDecimal number)
 	{
@@ -69,6 +83,14 @@ public final class BookStoreDemo implements HasLogger
 	public static CurrencyUnit currencyUnit()
 	{
 		return CURRENCY_UNIT;
+	}
+
+	/**
+	 * @return the {@link MonetaryAmountFormat} for this demo
+	 */
+	public static MonetaryAmountFormat monetaryAmountFormat()
+	{
+		return MONETARY_AMOUNT_FORMAT;
 	}
 
 	/**

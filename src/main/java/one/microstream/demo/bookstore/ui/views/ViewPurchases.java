@@ -1,10 +1,15 @@
 package one.microstream.demo.bookstore.ui.views;
 
+import static one.microstream.demo.bookstore.BookStoreDemo.monetaryAmountFormat;
+import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetary;
+
 import java.time.Year;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import org.javamoney.moneta.function.MonetarySummaryStatistics;
 
 import com.google.common.collect.Range;
 import com.vaadin.flow.component.Component;
@@ -13,7 +18,9 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
@@ -37,6 +44,7 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 	int      year = Year.now().getValue();
 	Shop     shop;
 	Customer customer;
+	Label    totalColumnFooter;
 
 	public ViewPurchases()
 	{
@@ -71,11 +79,16 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumnWithDynamicFilter("Shop", Purchase::shop, this.shop);
-		this.addGridColumnWithDynamicFilter("Employee", Purchase::employee);
-		this.addGridColumnWithDynamicFilter("Customer", Purchase::customer, this.customer);
-		this.addGridColumn("Timestamp", Purchase::timestamp);
-		this.addGridColumn("Total", Purchase::total);
+		this.addGridColumnWithDynamicFilter("Shop"     , Purchase::shop     , this.shop    );
+		this.addGridColumnWithDynamicFilter("Employee" , Purchase::employee                );
+		this.addGridColumnWithDynamicFilter("Customer" , Purchase::customer , this.customer);
+		this.addGridColumn                 ("Timestamp", Purchase::timestamp               );
+
+		this.addGridColumn(
+			"Total",
+			new TextRenderer<>(p -> monetaryAmountFormat().format(p.total()))
+		)
+		.setFooter(this.totalColumnFooter = new Label());
 
 		final Range<Integer> years = BookStoreDemo.getInstance().data().purchases().years();
 
@@ -100,13 +113,16 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 	private Component createPurchaseDetails(final Purchase purchase)
 	{
 		final Grid<Purchase.Item> grid = this.createGrid();
-		addGridColumn(grid, "ISBN", item -> item.book().isbn13());
-		addGridColumn(grid, "Book", item -> item.book().title());
-		addGridColumn(grid, "Author", item -> item.book().author().name());
+		addGridColumn(grid, "ISBN"     , item -> item.book().isbn13()          );
+		addGridColumn(grid, "Book"     , item -> item.book().title()           );
+		addGridColumn(grid, "Author"   , item -> item.book().author().name()   );
 		addGridColumn(grid, "Publisher", item -> item.book().publisher().name());
-		addGridColumn(grid, "Price", item -> item.price());
-		addGridColumn(grid, "Amount", item -> item.amount());
-		addGridColumn(grid, "Total", item -> item.itemTotal());
+		addGridColumn(grid, "Price"    , item -> item.price()                  );
+		addGridColumn(grid, "Amount"   , item -> item.amount()                 );
+		addGridColumn(grid,
+			"Total",
+			new TextRenderer<>(item -> monetaryAmountFormat().format(item.itemTotal()))
+		);
 		grid.setDataProvider(DataProvider.fromStream(purchase.items()));
 		grid.setHeightByRows(true);
 		return grid;
@@ -123,6 +139,17 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 		return BookStoreDemo.getInstance().data().purchases().computeByYear(
 			this.year,
 			function
+		);
+	}
+
+	@Override
+	protected void gridDataUpdated()
+	{
+		final MonetarySummaryStatistics stats = this.dataProvider.fetch(new Query<>())
+			.map(Purchase::total)
+			.collect(summarizingMonetary(BookStoreDemo.currencyUnit()));
+		this.totalColumnFooter.setText(
+			monetaryAmountFormat().format(stats.getSum())
 		);
 	}
 

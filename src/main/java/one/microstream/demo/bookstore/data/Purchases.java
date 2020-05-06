@@ -256,12 +256,18 @@ public interface Purchases
 			 * @param purchase the purchase to add
 			 */
 			YearlyPurchases add(
-				final Purchase purchase
+				final Purchase purchase,
+				final Persister persister
 			)
 			{
-				addToMap(this.shopToPurchases,     purchase.shop(),     purchase);
-				addToMap(this.employeeToPurchases, purchase.employee(), purchase);
-				addToMap(this.customerToPurchases, purchase.customer(), purchase);
+				final List<Object> changedObjects = new ArrayList<>();
+				addToMap(this.shopToPurchases,     purchase.shop(),     purchase, changedObjects);
+				addToMap(this.employeeToPurchases, purchase.employee(), purchase, changedObjects);
+				addToMap(this.customerToPurchases, purchase.customer(), purchase, changedObjects);
+				if(persister != null && changedObjects.size() > 0)
+				{
+					persister.storeAll(changedObjects);
+				}
 				return this;
 			}
 
@@ -277,12 +283,25 @@ public interface Purchases
 			private static <K> void addToMap(
 				final Map<K, Lazy<List<Purchase>>> map,
 				final K key,
-				final Purchase purchase
+				final Purchase purchase,
+				final List<Object> changedObjects
 			)
 			{
-				map.computeIfAbsent(key, k -> Lazy.Reference(new ArrayList<>(64)))
-					.get()
-					.add(purchase);
+				Lazy<List<Purchase>> lazy = map.get(key);
+				if(lazy == null)
+				{
+					final ArrayList<Purchase> list = new ArrayList<>(64);
+					list.add(purchase);
+					lazy = Lazy.Reference(list);
+					map.put(key, lazy);
+					changedObjects.add(map);
+				}
+				else
+				{
+					final List<Purchase> list = lazy.get();
+					list.add(purchase);
+					changedObjects.add(list);
+				}
 			}
 
 			/**
@@ -388,7 +407,7 @@ public interface Purchases
 			return this.write(year, () ->
 			{
 				final YearlyPurchases yearlyPurchases = new YearlyPurchases();
-				purchases.forEach(yearlyPurchases::add);
+				purchases.forEach(p -> yearlyPurchases.add(p, null));
 
 				final Lazy<YearlyPurchases> lazy = Lazy.Reference(yearlyPurchases);
 				this.yearlyPurchases.put(year, lazy);
@@ -416,7 +435,7 @@ public interface Purchases
 				final Lazy<YearlyPurchases> lazy = this.yearlyPurchases.get(year);
 				if(lazy != null)
 				{
-					persister.store(lazy.get().add(purchase));
+					lazy.get().add(purchase, persister);
 				}
 				else
 				{
@@ -424,7 +443,7 @@ public interface Purchases
 						this.yearlyPurchases.put(
 							year,
 							Lazy.Reference(
-								new YearlyPurchases().add(purchase)
+								new YearlyPurchases().add(purchase, null)
 							)
 						);
 						persister.store(this.yearlyPurchases);
