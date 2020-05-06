@@ -61,33 +61,33 @@ public class DialogBookCreate extends Dialog
 	{
 		super();
 
-		final TextField isbn13Field = new TextField("ISBN-13");
+		final TextField isbn13Field = new TextField(this.getTranslation("isbn13"));
 		isbn13Field.setPattern(Book.Validation.isbn13Pattern());
 		isbn13Field.setValue(generateIsbn13());
 
-		final TextField titleField = new TextField("Title");
+		final TextField titleField = new TextField(this.getTranslation("title"));
 
 		final ComboBox<Author> authorCombo = new ComboBoxNamed<>(
-			"Author",
+			this.getTranslation("author"),
 			BookStoreDemo.getInstance().data().books().authors()
 		);
 
 		final ComboBox<Genre> genreCombo = new ComboBoxNamed<>(
-			"Genre",
+			this.getTranslation("genre"),
 			BookStoreDemo.getInstance().data().books().genres()
 		);
 
 		final ComboBox<Publisher> publisherCombo = new ComboBoxNamed<>(
-			"Publisher",
+			this.getTranslation("publisher"),
 			BookStoreDemo.getInstance().data().books().publishers()
 		);
 
 		final ComboBox<Language> languageCombo = new ComboBoxNamed<>(
-			"Language",
+			this.getTranslation("language"),
 			BookStoreDemo.getInstance().data().books().languages()
 		);
 
-		final NumberField purchasePriceField = new NumberField("Purchase Price");
+		final NumberField purchasePriceField = new NumberField(this.getTranslation("purchasePrice"));
 
 		final Binder<Book> binder = new Binder<>();
 		binder.forField(isbn13Field)
@@ -130,7 +130,7 @@ public class DialogBookCreate extends Dialog
 			purchasePriceField
 		);
 
-		final Button okButton = new Button("OK", event ->
+		final Button okButton = new Button(this.getTranslation("ok"), event ->
 		{
 			if(binder.validate().isOk())
 			{
@@ -150,10 +150,10 @@ public class DialogBookCreate extends Dialog
 			}
 		});
 		okButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-		final Button cancelButton = new Button("Cancel", event -> this.close());
+		final Button cancelButton = new Button(this.getTranslation("cancel"), event -> this.close());
 		cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		this.add(new VerticalLayout(
-			new H3("Create New Book"),
+			new H3(this.getTranslation("createBook")),
 			form,
 			new HorizontalLayout(okButton, cancelButton)
 		));
@@ -176,7 +176,7 @@ public class DialogBookCreate extends Dialog
 		Book.Validation.validateIsbn13(isbn13);
 		if(BookStoreDemo.getInstance().data().books().ofIsbn13(isbn13) != null)
 		{
-			throw new IllegalArgumentException("ISBN already assigned to another book");
+			throw new IllegalArgumentException(this.getTranslation("isbnAlreadyAssigned"));
 		}
 		return isbn13;
 	}

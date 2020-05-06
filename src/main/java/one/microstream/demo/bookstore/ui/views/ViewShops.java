@@ -35,12 +35,12 @@ public class ViewShops extends ViewNamedWithAddress<Shop>
 		this.addGridColumnsForAddress();
 
 		final Button showInventoryButton = new Button(
-			"Show Inventory",
+			this.getTranslation("showInventory"),
 			VaadinIcon.STOCK.create(),
 			event -> this.showInventory(this.getSelectedEntity())
 		);
 		final Button showPurchasesButton = new Button(
-			"Show Purchases",
+			this.getTranslation("showPurchases"),
 			IronIcons.SHOPPING_BASKET.create(),
 			event -> this.showPurchases(this.getSelectedEntity())
 		);

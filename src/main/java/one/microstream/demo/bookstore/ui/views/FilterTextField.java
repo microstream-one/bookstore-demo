@@ -25,7 +25,7 @@ public class FilterTextField<E> extends TextField implements FilterField<E, Stri
 
 		this.filterFactory = notNull(filterFactory);
 
-		this.setPlaceholder("Filter");
+		this.setPlaceholder(this.getTranslation("filter"));
 		this.setClearButtonVisible(true);
 		this.setValueChangeMode(ValueChangeMode.TIMEOUT);
 	}

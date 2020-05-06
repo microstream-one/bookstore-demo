@@ -30,12 +30,12 @@ public class ViewCustomers extends ViewNamedWithAddress<Customer>
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumn("ID", Customer::customerId);
+		this.addGridColumn(this.getTranslation("id"), Customer::customerId);
 		this.addGridColumnForName();
 		this.addGridColumnsForAddress();
 
 		final Button showPurchasesButton = new Button(
-			"Show Purchases",
+			this.getTranslation("showPurchases"),
 			IronIcons.SHOPPING_BASKET.create(),
 			event -> this.showPurchases(this.getSelectedEntity())
 		);

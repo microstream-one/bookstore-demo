@@ -1,10 +1,14 @@
 package one.microstream.demo.bookstore.ui.views;
 
+import static one.microstream.demo.bookstore.BookStoreDemo.monetaryAmountFormat;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import javax.money.MonetaryAmount;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,6 +25,7 @@ import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 
@@ -65,6 +70,7 @@ public abstract class ViewEntity<E> extends VerticalLayout
 	{
 		final Grid<T> grid = new Grid<>();
 		grid.setMultiSort(true);
+		grid.setColumnReorderingAllowed(true);
 		grid.addThemeVariants(
 			GridVariant.LUMO_NO_BORDER,
 			GridVariant.LUMO_NO_ROW_BORDERS,
@@ -259,7 +265,9 @@ public abstract class ViewEntity<E> extends VerticalLayout
 		);
 	}
 
-	private void markAsDynamic(final ComboBox<?> combo)
+	private void markAsDynamic(
+		final ComboBox<?> combo
+	)
 	{
 		ComponentUtil.setData(
 			combo,
@@ -269,7 +277,9 @@ public abstract class ViewEntity<E> extends VerticalLayout
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void refreshIfDynamic(final Object element)
+	private void refreshIfDynamic(
+		final Object element
+	)
 	{
 		if(element instanceof Component)
 		{
@@ -286,6 +296,20 @@ public abstract class ViewEntity<E> extends VerticalLayout
 
 	protected E getSelectedEntity()
 	{
-		return this.grid.getSelectionModel().getFirstSelectedItem().orElse(null);
+		return this.grid.getSelectionModel()
+			.getFirstSelectedItem()
+			.orElse(null);
 	}
+
+	protected static <T> Renderer<T> moneyRenderer(
+		final ValueProvider<T, ? extends MonetaryAmount> valueProvider
+	)
+	{
+		return new TextRenderer<>(
+			entity -> monetaryAmountFormat().format(
+				valueProvider.apply(entity)
+			)
+		);
+	}
+
 }

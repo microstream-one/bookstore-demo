@@ -28,7 +28,7 @@ public class FilterComboBox<E, F extends Named> extends ComboBoxNamed<F> impleme
 
 		this.filterFactory = notNull(filterFactory);
 
-		this.setPlaceholder("Filter");
+		this.setPlaceholder(this.getTranslation("filter"));
 		this.setClearButtonVisible(true);
 	}
 

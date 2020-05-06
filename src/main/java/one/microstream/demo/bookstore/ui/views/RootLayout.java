@@ -35,7 +35,7 @@ public class RootLayout
 	{
 		super();
 
-		final Label titleLabel = new Label("BookStore Demo");
+		final Label titleLabel = new Label(this.getTranslation("app.title"));
 		titleLabel.getStyle().set("margin-right", "var(--lumo-space-xl)");
 
 		final HorizontalLayout logoLayout = new HorizontalLayout(
@@ -50,12 +50,12 @@ public class RootLayout
 			.withIconComponent(logoLayout)
 			.withAppMenu(
 				LeftAppMenuBuilder.get()
-				.add(new LeftNavigationItem("Home", VaadinIcon.HOME.create(), ViewMain.class))
-				.add(new LeftNavigationItem("Books", VaadinIcon.BOOK.create(), ViewBooks.class))
-				.add(new LeftNavigationItem("Shops", VaadinIcon.SHOP.create(), ViewShops.class))
-				.add(new LeftNavigationItem("Inventory", VaadinIcon.STORAGE.create(), ViewInventory.class))
-				.add(new LeftNavigationItem("Customers", SocialIcons.PERSON.create(), ViewCustomers.class))
-				.add(new LeftNavigationItem("Purchases", IronIcons.SHOPPING_BASKET.create(), ViewPurchases.class))
+				.add(new LeftNavigationItem(this.getTranslation("home")     , VaadinIcon.HOME.create()          , ViewMain.class     ))
+				.add(new LeftNavigationItem(this.getTranslation("books")    , VaadinIcon.BOOK.create()          , ViewBooks.class    ))
+				.add(new LeftNavigationItem(this.getTranslation("shops")    , VaadinIcon.SHOP.create()          , ViewShops.class    ))
+				.add(new LeftNavigationItem(this.getTranslation("inventory"), VaadinIcon.STORAGE.create()       , ViewInventory.class))
+				.add(new LeftNavigationItem(this.getTranslation("customers"), SocialIcons.PERSON.create()       , ViewCustomers.class))
+				.add(new LeftNavigationItem(this.getTranslation("purchases"), IronIcons.SHOPPING_BASKET.create(), ViewPurchases.class))
 				.build()
 			)
 			.build()

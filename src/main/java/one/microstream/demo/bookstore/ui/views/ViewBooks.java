@@ -30,15 +30,15 @@ public class ViewBooks extends ViewEntity<Book>
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumnWithTextFilter   ("Title"    , Book::title    );
-		this.addGridColumnWithDynamicFilter("Author"   , Book::author   );
-		this.addGridColumnWithDynamicFilter("Genre"    , Book::genre    );
-		this.addGridColumnWithDynamicFilter("Publisher", Book::publisher);
-		this.addGridColumnWithDynamicFilter("Language" , Book::language );
-		this.addGridColumnWithTextFilter   ("ISBN"     , Book::isbn13   );
+		this.addGridColumnWithTextFilter   (this.getTranslation("title")    , Book::title    );
+		this.addGridColumnWithDynamicFilter(this.getTranslation("author")   , Book::author   );
+		this.addGridColumnWithDynamicFilter(this.getTranslation("genre")    , Book::genre    );
+		this.addGridColumnWithDynamicFilter(this.getTranslation("publisher"), Book::publisher);
+		this.addGridColumnWithDynamicFilter(this.getTranslation("language") , Book::language );
+		this.addGridColumnWithTextFilter   (this.getTranslation("isbn13")   , Book::isbn13   );
 
 		final Button showInventoryButton = new Button(
-			"Show Inventory",
+			this.getTranslation("showInventory"),
 			VaadinIcon.STOCK.create(),
 			event -> this.showInventory(this.getSelectedEntity())
 		);
@@ -49,7 +49,7 @@ public class ViewBooks extends ViewEntity<Book>
 		});
 
 		final Button createBookButton = new Button(
-			"New Book",
+			this.getTranslation("createBook"),
 			VaadinIcon.PLUS_CIRCLE.create(),
 			event -> this.openCreateBookDialog()
 		);

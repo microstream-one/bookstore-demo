@@ -19,11 +19,11 @@ public abstract class ViewNamedWithAddress<E extends NamedWithAddress> extends V
 
 	protected void addGridColumnsForAddress()
 	{
-		this.addGridColumnWithTextFilter   ("Address",  e -> e.address().address()               );
-		this.addGridColumnWithTextFilter   ("Address2", e -> e.address().address2()              );
-		this.addGridColumnWithTextFilter   ("Zipcode",  e -> e.address().zipCode()               );
-		this.addGridColumnWithDynamicFilter("City",     e -> e.address().city()                  );
-		this.addGridColumnWithDynamicFilter("State",    e -> e.address().city().state()          );
-		this.addGridColumnWithDynamicFilter("Country",  e -> e.address().city().state().country());
+		this.addGridColumnWithTextFilter   (this.getTranslation("address1"), e -> e.address().address()               );
+		this.addGridColumnWithTextFilter   (this.getTranslation("address2"), e -> e.address().address2()              );
+		this.addGridColumnWithTextFilter   (this.getTranslation("zipcode"),  e -> e.address().zipCode()               );
+		this.addGridColumnWithDynamicFilter(this.getTranslation("city"),     e -> e.address().city()                  );
+		this.addGridColumnWithDynamicFilter(this.getTranslation("state"),    e -> e.address().city().state()          );
+		this.addGridColumnWithDynamicFilter(this.getTranslation("country"),  e -> e.address().city().state().country());
 	}
 }

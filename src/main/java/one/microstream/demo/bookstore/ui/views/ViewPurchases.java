@@ -20,7 +20,6 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
@@ -29,6 +28,7 @@ import com.vaadin.flow.router.Route;
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Customer;
 import one.microstream.demo.bookstore.data.Purchase;
+import one.microstream.demo.bookstore.data.Purchase.Item;
 import one.microstream.demo.bookstore.data.Purchases;
 import one.microstream.demo.bookstore.data.Shop;
 import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
@@ -79,16 +79,12 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumnWithDynamicFilter("Shop"     , Purchase::shop     , this.shop    );
-		this.addGridColumnWithDynamicFilter("Employee" , Purchase::employee                );
-		this.addGridColumnWithDynamicFilter("Customer" , Purchase::customer , this.customer);
-		this.addGridColumn                 ("Timestamp", Purchase::timestamp               );
-
-		this.addGridColumn(
-			"Total",
-			new TextRenderer<>(p -> monetaryAmountFormat().format(p.total()))
-		)
-		.setFooter(this.totalColumnFooter = new Label());
+		this.addGridColumnWithDynamicFilter(this.getTranslation("shop")     , Purchase::shop     , this.shop    );
+		this.addGridColumnWithDynamicFilter(this.getTranslation("employee") , Purchase::employee                );
+		this.addGridColumnWithDynamicFilter(this.getTranslation("customer") , Purchase::customer , this.customer);
+		this.addGridColumn                 (this.getTranslation("timestamp"), Purchase::timestamp               );
+		this.addGridColumn                 (this.getTranslation("total")    , moneyRenderer(Purchase::total)    )
+			.setFooter(this.totalColumnFooter = new Label());
 
 		final Range<Integer> years = BookStoreDemo.getInstance().data().purchases().years();
 
@@ -102,7 +98,10 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 			this.refresh();
 		});
 
-		final HorizontalLayout bar = new HorizontalLayout(new Label("Year"), yearField);
+		final HorizontalLayout bar = new HorizontalLayout(
+			new Label(this.getTranslation("year")),
+			yearField
+		);
 		bar.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
 		this.add(bar);
 
@@ -113,16 +112,13 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 	private Component createPurchaseDetails(final Purchase purchase)
 	{
 		final Grid<Purchase.Item> grid = this.createGrid();
-		addGridColumn(grid, "ISBN"     , item -> item.book().isbn13()          );
-		addGridColumn(grid, "Book"     , item -> item.book().title()           );
-		addGridColumn(grid, "Author"   , item -> item.book().author().name()   );
-		addGridColumn(grid, "Publisher", item -> item.book().publisher().name());
-		addGridColumn(grid, "Price"    , item -> item.price()                  );
-		addGridColumn(grid, "Amount"   , item -> item.amount()                 );
-		addGridColumn(grid,
-			"Total",
-			new TextRenderer<>(item -> monetaryAmountFormat().format(item.itemTotal()))
-		);
+		addGridColumn(grid, this.getTranslation("isbn13")   , item -> item.book().isbn13()           );
+		addGridColumn(grid, this.getTranslation("book")     , item -> item.book().title()            );
+		addGridColumn(grid, this.getTranslation("author")   , item -> item.book().author().name()    );
+		addGridColumn(grid, this.getTranslation("publisher"), item -> item.book().publisher().name() );
+		addGridColumn(grid, this.getTranslation("price")    , moneyRenderer(Item::price)             );
+		addGridColumn(grid, this.getTranslation("amount")   , Item::amount                           );
+		addGridColumn(grid, this.getTranslation("total")    , moneyRenderer(Item::itemTotal)         );
 		grid.setDataProvider(DataProvider.fromStream(purchase.items()));
 		grid.setHeightByRows(true);
 		return grid;

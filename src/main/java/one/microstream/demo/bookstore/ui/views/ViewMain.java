@@ -20,7 +20,7 @@ public class ViewMain extends VerticalLayout
 	{
 		super();
 
-		final Image image = new Image("frontend/images/bookstoredemo.svg", "BookStore Demo");
+		final Image image = new Image("frontend/images/bookstoredemo.svg", this.getTranslation("app.title"));
 		image.setWidth("80%");
 		image.setMaxWidth("800px");
 		image.setHeight(null);
