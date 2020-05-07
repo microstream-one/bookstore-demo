@@ -1,5 +1,8 @@
 package one.microstream.demo.bookstore.ui.views;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.flowingcode.vaadin.addons.ironicons.IronIcons;
 import com.flowingcode.vaadin.addons.ironicons.SocialIcons;
 import com.github.appreciated.app.layout.component.applayout.LeftLayouts;
@@ -67,8 +70,22 @@ public class RootLayout
 		final InitialPageSettings settings
 	)
 	{
-		settings.addLink   ("shortcut icon", "frontend/images/logo.ico"           );
-		settings.addFavIcon("icon"         , "frontend/images/logo256.png", "256x256");
+		addLink(settings, "frontend/images/favicon.svg", "rel", "icon", "type", "image/svg+xml");
+		addLink(settings, "frontend/images/favicon.ico", "rel", "alternate icon");
+	}
+
+	private static void addLink(
+		final InitialPageSettings settings,
+		final String href,
+		final String... attributes
+	)
+	{
+		final Map<String, String> map = new HashMap<>();
+		for(int i = 0; i < attributes.length; )
+		{
+			map.put(attributes[i++], attributes[i++]);
+		}
+		settings.addLink(href, map);
 	}
 
 }
