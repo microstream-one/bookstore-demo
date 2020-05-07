@@ -18,7 +18,7 @@ mvn spring-boot:run
 
 Then open [http://localhost:8080/](http://localhost:8080/)
 
-![Screenshot](./src/main/resources/META-INF/resources/frontend/images/ui.jpg)
+![Screenshot](./src/main/resources/META-INF/resources/frontend/images/ui.jpg?raw=true)
 
 ## Description
 
