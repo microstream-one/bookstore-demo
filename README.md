@@ -7,7 +7,7 @@ Deploy this demo to Gitpod:
 ## Running locally
 
 This is a [Spring Boot](https://spring.io/guides/gs/spring-boot/) application built using 
-[Maven](https://spring.io/guides/gs/maven/) and [npm](https://www.npmjs.com/). 
+[Maven](https://spring.io/guides/gs/maven/) and [pnpm](https://pnpm.js.org/). 
 You can build and run it from the command line:
 
 ```

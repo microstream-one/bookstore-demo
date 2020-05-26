@@ -41,7 +41,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<microstream.version>03.00.00-MS-GA</microstream.version>
 		<lucene.version>8.5.1</lucene.version>
-		<vaadin.version>14.1.17</vaadin.version>
+		<vaadin.version>14.2.0</vaadin.version>
 	</properties>
 
 	<repositories>
@@ -166,6 +166,9 @@
 						<goals>
 							<goal>prepare-frontend</goal>
 						</goals>
+						<configuration>
+							<pnpmEnable>true</pnpmEnable>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -204,6 +207,9 @@
                                     <goal>build-frontend</goal>
                                 </goals>
                                 <phase>compile</phase>
+								<configuration>
+									<pnpmEnable>true</pnpmEnable>
+								</configuration>
                             </execution>
                         </executions>
                     </plugin>
