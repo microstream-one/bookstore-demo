@@ -171,7 +171,7 @@ public interface Purchases
 	public long countPurchasesOfForeigners(int year);
 
 	/**
-	 * Computes all purchases which were made by customers in foreign countries.
+	 * Computes all purchases which were made by customers in foreign cities.
 	 *
 	 * @param year the year to filter by
 	 * @return a list of purchases
