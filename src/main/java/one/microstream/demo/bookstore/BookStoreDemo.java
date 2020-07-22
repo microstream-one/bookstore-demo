@@ -127,8 +127,8 @@ public final class BookStoreDemo implements HasLogger
 	}
 
 
-	private final RandomDataAmount initialDataAmount;
-	private EmbeddedStorageManager storageManager;
+	private final    RandomDataAmount       initialDataAmount;
+	private volatile EmbeddedStorageManager storageManager   ;
 
 	/**
 	 * Creates a new demo instance.
@@ -151,35 +151,56 @@ public final class BookStoreDemo implements HasLogger
 	 */
 	public EmbeddedStorageManager storageManager()
 	{
+		/*
+		 * Double-checked locking to reduce the overhead of acquiring a lock
+		 * by testing the locking criterion.
+		 * The field (this.storageManager) has to be volatile.
+		 */
 		if(this.storageManager == null)
 		{
-			this.logger().info("Initializing MicroStream StorageManager");
-
-			final Configuration configuration = Configuration.Default();
-			configuration.setBaseDirectory(Paths.get("data", "storage").toString());
-			configuration.setChannelCount(Integer.highestOneBit(Runtime.getRuntime().availableProcessors() - 1));
-
-			final EmbeddedStorageFoundation<?> foundation = configuration.createEmbeddedStorageFoundation();
-			foundation.onConnectionFoundation(BinaryHandlersJDK8::registerJDK8TypeHandlers);
-			this.storageManager = foundation.createEmbeddedStorageManager().start();
-
-			if(this.storageManager.root() == null)
+			synchronized(this)
 			{
-				this.logger().info("No data found, initializing random data");
-
-				final Data.Default data = Data.New();
-				this.storageManager.setRoot(data);
-				this.storageManager.storeRoot();
-				final DataMetrics metrics = data.populate(
-					this.initialDataAmount,
-					this.storageManager
-				);
-
-				this.logger().info("Random data generated: " + metrics.toString());
+				if(this.storageManager == null)
+				{
+					this.storageManager = this.createStorageManager();
+				}
 			}
 		}
 
 		return this.storageManager;
+	}
+
+	/**
+	 * Creates an {@link EmbeddedStorageManager} and initializes random {@link Data} if empty.
+	 */
+	private EmbeddedStorageManager createStorageManager()
+	{
+		this.logger().info("Initializing MicroStream StorageManager");
+
+		final Configuration configuration = Configuration.Default();
+		configuration.setBaseDirectory(Paths.get("data", "storage").toString());
+		configuration.setChannelCount(Integer.highestOneBit(Runtime.getRuntime().availableProcessors() - 1));
+
+		final EmbeddedStorageFoundation<?> foundation = configuration.createEmbeddedStorageFoundation();
+		foundation.onConnectionFoundation(BinaryHandlersJDK8::registerJDK8TypeHandlers);
+		final EmbeddedStorageManager storageManager = foundation.createEmbeddedStorageManager().start();
+
+		if(storageManager.root() == null)
+		{
+			this.logger().info("No data found, initializing random data");
+
+			final Data.Default data = Data.New();
+			storageManager.setRoot(data);
+			storageManager.storeRoot();
+			final DataMetrics metrics = data.populate(
+				this.initialDataAmount,
+				this.storageManager
+			);
+
+			this.logger().info("Random data generated: " + metrics.toString());
+		}
+
+		return storageManager;
 	}
 
 	/**
@@ -196,7 +217,7 @@ public final class BookStoreDemo implements HasLogger
 	/**
 	 * Shuts down the {@link EmbeddedStorageManager} of this demo.
 	 */
-	public void shutdown()
+	public synchronized void shutdown()
 	{
 		if(this.storageManager != null)
 		{
