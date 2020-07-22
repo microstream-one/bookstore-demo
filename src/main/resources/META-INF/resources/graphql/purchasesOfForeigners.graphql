@@ -1,0 +1,21 @@
+{
+  purchasesOfForeigners(year: 2020) { 
+    total,
+    shop {
+      name,
+      address {
+        city {
+          name
+        }
+      }
+    },
+    customer {
+      name,
+      address {
+        city {
+          name
+        }
+      }
+    }
+  }
+}

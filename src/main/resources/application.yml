@@ -1,0 +1,25 @@
+
+server.port: 8080
+
+vaadin:
+    compatibilityMode: false
+    original.frontend.resources: false
+    pnpm.enable: true
+    
+logging.level.org.atmosphere: warn
+ 
+graphql.playground:
+    tabs:
+        - name: Books by Title
+          query: classpath:META-INF/resources/graphql/booksByTitle.graphql
+        - name: Employee of the Year
+          query: classpath:META-INF/resources/graphql/employeeOfTheYear.graphql
+        - name: Bestseller
+          query: classpath:META-INF/resources/graphql/bestSellerList.graphql
+        - name: Bestseller By Country
+          query: classpath:META-INF/resources/graphql/bestSellerListByCountry.graphql
+        - name: Purchases of Foreigners
+          query: classpath:META-INF/resources/graphql/purchasesOfForeigners.graphql
+        - name: Purchases of Foreigners By Country
+          query: classpath:META-INF/resources/graphql/purchasesOfForeignersByCountry.graphql
+        

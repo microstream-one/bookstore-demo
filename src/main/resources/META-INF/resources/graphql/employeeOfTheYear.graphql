@@ -1,0 +1,5 @@
+{
+  employeeOfTheYear(year: 2020) {
+    name
+  }
+}

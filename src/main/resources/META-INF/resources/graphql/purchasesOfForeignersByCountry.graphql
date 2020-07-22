@@ -1,0 +1,21 @@
+{
+  purchasesOfForeignersByCountry(year: 2020, country: "us") { 
+    total,
+    shop {
+      name,
+      address {
+        city {
+          name
+        }
+      }
+    },
+    customer {
+      name,
+      address {
+        city {
+          name
+        }
+      }
+    }
+  }
+}

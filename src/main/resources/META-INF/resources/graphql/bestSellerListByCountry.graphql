@@ -1,0 +1,8 @@
+{
+  bestSellerListByCountry(year: 2020, country: "us") {
+    book {
+      title
+    }
+    amount
+  }
+}

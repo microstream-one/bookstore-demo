@@ -38,6 +38,11 @@ The [data layer](./src/main/java/one/microstream/demo/bookstore/data/) also cont
 We used [Vaadin](https://vaadin.com) to create the [UI](./src/main/java/one/microstream/demo/bookstore/ui/).
 Start point is the main class [VaadinApplication](./src/main/java/one/microstream/demo/bookstore/VaadinApplication.java).
 
+[GraphQL](./src/main/java/one/microstream/demo/bookstore/graphql/) is used to get data access from outside.
+Playground application is available at [http://localhost:8080/playground](http://localhost:8080/playground) 
+and a graphical overview of the schema: [http://localhost:8080/voyager](http://localhost:8080/voyager) 
+
+
 ## If you find a bug or want to suggest an improvement
 
 Please feel free to report issues here: 

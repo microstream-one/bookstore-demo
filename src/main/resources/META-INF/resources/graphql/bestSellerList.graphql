@@ -1,0 +1,8 @@
+{
+  bestSellerList(year: 2020) {
+    book {
+      title
+    }
+    amount
+  }
+}

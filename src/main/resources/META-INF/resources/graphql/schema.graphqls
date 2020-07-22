@@ -1,0 +1,97 @@
+type Query {	
+	booksByTitle(title: String): [Book]
+	employeeOfTheYear(year: Int): Employee
+	bestSellerList(year: Int): [BookSales]
+	bestSellerListByCountry(year: Int, country: String): [BookSales]
+	purchasesOfForeigners(year: Int): [Purchase]
+	purchasesOfForeignersByCountry(year: Int, country: String): [Purchase]
+}
+
+type BookSales {
+	book: Book
+	amount: Int
+}
+
+type Book {
+	isbn13: String
+	title:	String
+	author: Author
+	genre: Genre
+	publisher: Publisher
+	language: Language
+	purchasePrice: String 	
+	retailPrice: String 
+}
+
+type Genre {
+	name: String
+}
+
+type Publisher {
+	name: String
+	address: Address
+}
+
+type Language {
+	name: String
+}
+
+type Author {
+	name: String
+	address: Address
+}
+
+type Address {
+	address: String
+	address2: String
+	zipCode: String
+	city: City
+}
+
+type City {
+	name: String
+	state: State
+}
+
+type State {
+	name: String
+	country: Country
+}
+
+type Country {
+	name: String
+	code: String
+}
+
+type Employee {
+	name: String
+	address: Address
+}
+
+type Customer {
+	name: String
+	address: Address
+}
+
+type Shop {
+	name: String
+	address: Address
+	employees: [Employee]
+}
+
+type PurchaseItem {
+	amount: Int
+	book: Book
+	price: String
+	itemTotal: String
+}
+
+type Purchase {
+	items: [PurchaseItem]
+	customer: Customer
+	employee: Employee
+	shop: Shop
+	timestamp: String
+	total: String
+}
+
