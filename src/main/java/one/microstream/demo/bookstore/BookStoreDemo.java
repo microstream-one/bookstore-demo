@@ -194,7 +194,7 @@ public final class BookStoreDemo implements HasLogger
 			storageManager.storeRoot();
 			final DataMetrics metrics = data.populate(
 				this.initialDataAmount,
-				this.storageManager
+				storageManager
 			);
 
 			this.logger().info("Random data generated: " + metrics.toString());
