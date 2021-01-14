@@ -179,7 +179,10 @@ public final class BookStoreDemo implements HasLogger
 
 		final Configuration configuration = Configuration.Default();
 		configuration.setBaseDirectory(Paths.get("data", "storage").toString());
-		configuration.setChannelCount(Integer.highestOneBit(Runtime.getRuntime().availableProcessors() - 1));
+		configuration.setChannelCount(Math.max(
+			1, // minimum one channel, if only 1 core is available
+			Integer.highestOneBit(Runtime.getRuntime().availableProcessors() - 1)
+		));
 
 		final EmbeddedStorageFoundation<?> foundation = configuration.createEmbeddedStorageFoundation();
 		foundation.onConnectionFoundation(BinaryHandlersJDK8::registerJDK8TypeHandlers);
