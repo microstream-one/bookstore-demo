@@ -39,9 +39,9 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<microstream.version>04.00.00-MS-GA</microstream.version>
-		<lucene.version>8.5.1</lucene.version>
-		<vaadin.version>14.2.0</vaadin.version>
+		<microstream.version>04.01.00-MS-GA</microstream.version>
+		<lucene.version>8.8.2</lucene.version>
+		<vaadin.version>14.5.3</vaadin.version>
 	</properties>
 
 	<repositories>
@@ -121,7 +121,7 @@
 		<dependency>
 			<groupId>org.rapidpm</groupId>
 			<artifactId>rapidpm-logger-adapter</artifactId>
-			<version>01.00.06-RPM</version>
+			<version>01.00.10-RPM</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
@@ -134,7 +134,7 @@
 		<dependency>
 			<groupId>com.github.appreciated</groupId>
 			<artifactId>app-layout-addon</artifactId>
-			<version>4.0.0.rc5</version>
+			<version>4.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.flowingcode.addons</groupId>
