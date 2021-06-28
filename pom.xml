@@ -41,7 +41,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<microstream.version>04.01.00-MS-GA</microstream.version>
 		<lucene.version>8.8.2</lucene.version>
-		<vaadin.version>14.5.3</vaadin.version>
+		<vaadin.version>14.6.2</vaadin.version>
 	</properties>
 
 	<repositories>
