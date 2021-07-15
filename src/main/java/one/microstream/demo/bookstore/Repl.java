@@ -38,6 +38,7 @@ public class Repl implements Runnable
 		this.bookStoreDemo = bookStoreDemo;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void run()
 	{

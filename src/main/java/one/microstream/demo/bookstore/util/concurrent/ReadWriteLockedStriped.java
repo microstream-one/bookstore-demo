@@ -16,223 +16,137 @@ import com.google.common.util.concurrent.Striped;
  * have been finished.
  * Additionally, a write operation can acquire the read lock, but not vice-versa.
  */
-public interface ReadWriteLockedStriped
+public class ReadWriteLockedStriped
 {
-	/**
-	 * Executes an operation protected by a read lock for a given key.
-	 *
-	 * @param <T> the operation's return type
-	 * @param key an arbitrary, non-null key
-	 * @param operation the operation to execute
-	 * @return the operation's result
+	/*
+	 * Transient means it is not persisted by MicroStream, but created on demand.
 	 */
-	public <T> T read(Object key, ValueOperation<T> operation);
+	private transient volatile Striped<ReadWriteLock> stripes;
 
-	/**
-	 * Executes an operation protected by a read lock for a given key.
-	 *
-	 * @param key an arbitrary, non-null key
-	 * @param operation the operation to execute
-	 */
-	public void read(Object key, VoidOperation operation);
-
-	/**
-	 * Executes an operation protected by a write lock for a given key.
-	 *
-	 * @param <T> the operation's return type
-	 * @param key an arbitrary, non-null key
-	 * @param operation the operation to execute
-	 * @return the operation's result
-	 */
-	public <T> T write(Object key, ValueOperation<T> operation);
-
-	/**
-	 * Executes an operation protected by a write lock for a given key.
-	 *
-	 * @param key an arbitrary, non-null key
-	 * @param operation the operation to execute
-	 */
-	public void write(Object key, VoidOperation operation);
-
-
-	/**
-	 * Pseudo-constructor method to create a new {@link ReadWriteLockedStriped}
-	 * instance with default implementation.
-	 *
-	 * @return a new {@link ReadWriteLockedStriped} instance
-	 */
-	public static ReadWriteLockedStriped New()
+	public ReadWriteLockedStriped()
 	{
-		return new Default();
+		super();
 	}
-
-
-	/**
-	 * Default implementation of the {@link ReadWriteLockedStriped} interface
-	 * which utilizes {@link Striped} for locking.
-	 *
-	 */
-	public static class Default implements ReadWriteLockedStriped
-	{
-		private final Striped<ReadWriteLock> stripes = Striped.lazyWeakReadWriteLock(4);
-
-		Default()
-		{
-			super();
-		}
-
-		@Override
-		public <T> T read(
-			final Object key,
-			final ValueOperation<T> operation
-			)
-		{
-			final Lock readLock = this.stripes.get(key).readLock();
-			readLock.lock();
-
-			try
-			{
-				return operation.execute();
-			}
-			finally
-			{
-				readLock.unlock();
-			}
-		}
-
-		@Override
-		public void read(
-			final Object key,
-			final VoidOperation operation
-		)
-		{
-			final Lock readLock = this.stripes.get(key).readLock();
-			readLock.lock();
-
-			try
-			{
-				operation.execute();
-			}
-			finally
-			{
-				readLock.unlock();
-			}
-		}
-
-		@Override
-		public <T> T write(
-			final Object key,
-			final ValueOperation<T> operation
-		)
-		{
-			final Lock writeLock = this.stripes.get(key).writeLock();
-			writeLock.lock();
-
-			try
-			{
-				return operation.execute();
-			}
-			finally
-			{
-				writeLock.unlock();
-			}
-		}
-
-		@Override
-		public void write(
-			final Object key,
-			final VoidOperation operation
-		)
-		{
-			final Lock writeLock = this.stripes.get(key).writeLock();
-			writeLock.lock();
-
-			try
-			{
-				operation.execute();
-			}
-			finally
-			{
-				writeLock.unlock();
-			}
-		}
-
-	}
-
-
-	/**
-	 * Abstract base class for {@link ReadWriteLockedStriped} scopes.
-	 *
-	 */
-	public static abstract class Scope implements ReadWriteLockedStriped
+	
+	private Striped<ReadWriteLock> stripes()
 	{
 		/*
-		 * Transient means it is not persisted by MicroStream, but created on demand.
+		 * Double-checked locking to reduce the overhead of acquiring a lock
+		 * by testing the locking criterion.
+		 * The field (this.delegate) has to be volatile.
 		 */
-		private transient volatile ReadWriteLockedStriped delegate;
-
-		protected Scope()
+		Striped<ReadWriteLock> stripes = this.stripes;
+		if(stripes == null)
 		{
-			super();
-		}
-
-		protected ReadWriteLockedStriped delegate()
-		{
-			/*
-			 * Double-checked locking to reduce the overhead of acquiring a lock
-			 * by testing the locking criterion.
-			 * The field (this.delegate) has to be volatile.
-			 */
-			ReadWriteLockedStriped delegate = this.delegate;
-			if(delegate == null)
+			synchronized(this)
 			{
-				synchronized(this)
+				if((stripes = this.stripes) == null)
 				{
-					if((delegate = this.delegate) == null)
-					{
-						delegate = this.delegate = ReadWriteLockedStriped.New();
-					}
+					stripes = this.stripes = Striped.lazyWeakReadWriteLock(4);
 				}
 			}
-			return delegate;
 		}
-
-		@Override
-		public <T> T read(
-			final Object key,
-			final ValueOperation<T> operation
+		return stripes;
+	}
+	
+	/**
+	 * Executes an operation protected by a read lock for a given key.
+	 *
+	 * @param <T> the operation's return type
+	 * @param key an arbitrary, non-null key
+	 * @param operation the operation to execute
+	 * @return the operation's result
+	 */
+	public final <T> T read(
+		final Object            key      ,
+		final ValueOperation<T> operation
 		)
-		{
-			return this.delegate().read(key, operation);
-		}
+	{
+		final Lock readLock = this.stripes().get(key).readLock();
+		readLock.lock();
 
-		@Override
-		public void read(
-			final Object key,
-			final VoidOperation operation
-		)
+		try
 		{
-			this.delegate().read(key, operation);
+			return operation.execute();
 		}
-
-		@Override
-		public <T> T write(
-			final Object key,
-			final ValueOperation<T> operation
-		)
+		finally
 		{
-			return this.delegate().write(key, operation);
+			readLock.unlock();
 		}
+	}
 
-		@Override
-		public void write(
-			final Object key,
-			final VoidOperation operation
-		)
+	/**
+	 * Executes an operation protected by a read lock for a given key.
+	 *
+	 * @param key an arbitrary, non-null key
+	 * @param operation the operation to execute
+	 */
+	public final void read(
+		final Object        key      ,
+		final VoidOperation operation
+	)
+	{
+		final Lock readLock = this.stripes().get(key).readLock();
+		readLock.lock();
+
+		try
 		{
-			this.delegate().write(key, operation);
+			operation.execute();
 		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
 
+	/**
+	 * Executes an operation protected by a write lock for a given key.
+	 *
+	 * @param <T> the operation's return type
+	 * @param key an arbitrary, non-null key
+	 * @param operation the operation to execute
+	 * @return the operation's result
+	 */
+	public final <T> T write(
+		final Object            key      ,
+		final ValueOperation<T> operation
+	)
+	{
+		final Lock writeLock = this.stripes().get(key).writeLock();
+		writeLock.lock();
+
+		try
+		{
+			return operation.execute();
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
+	 * Executes an operation protected by a write lock for a given key.
+	 *
+	 * @param key an arbitrary, non-null key
+	 * @param operation the operation to execute
+	 */
+	public final void write(
+		final Object        key      ,
+		final VoidOperation operation
+	)
+	{
+		final Lock writeLock = this.stripes().get(key).writeLock();
+		writeLock.lock();
+
+		try
+		{
+			operation.execute();
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
 	}
 
 }

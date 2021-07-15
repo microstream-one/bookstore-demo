@@ -1,6 +1,5 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import static one.microstream.demo.bookstore.BookStoreDemo.monetaryAmountFormat;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,6 +29,7 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.BeforeEvent;
 
+import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Named;
 import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider;
 
@@ -38,7 +38,6 @@ import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider;
  *
  * @param <E> the entity type
  */
-@SuppressWarnings("serial")
 public abstract class ViewEntity<E> extends VerticalLayout
 {
 	final Grid<E>                 grid;
@@ -107,6 +106,7 @@ public abstract class ViewEntity<E> extends VerticalLayout
 
 	protected void gridDataUpdated()
 	{
+		// no-op by default
 	}
 
 	protected Grid.Column<E> addGridColumn(
@@ -307,7 +307,7 @@ public abstract class ViewEntity<E> extends VerticalLayout
 	)
 	{
 		return new TextRenderer<>(
-			entity -> monetaryAmountFormat().format(
+			entity -> BookStoreDemo.MONETARY_AMOUNT_FORMAT.format(
 				valueProvider.apply(entity)
 			)
 		);

@@ -2,7 +2,7 @@
 package one.microstream.demo.bookstore.data;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
-import one.microstream.storage.types.EmbeddedStorageManager;
+import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 
 /**
  * Root object for all data used by this application.
@@ -19,104 +19,71 @@ import one.microstream.storage.types.EmbeddedStorageManager;
  *
  * @see <a href="https://manual.docs.microstream.one/data-store/root-instances">MicroStream Reference Manual</a>
  */
-public interface Data
+public class Data
 {
+	private final Books     books     = new Books    ();
+	private final Shops     shops     = new Shops    ();
+	private final Customers customers = new Customers();
+	private final Purchases purchases = new Purchases();
+
+	public Data()
+	{
+		super();
+	}
+	
 	/**
 	 * Get the {@link Books} instance of this data node.
 	 * @return the {@link Books}
 	 */
-	public Books books();
+	public Books books()
+	{
+		return this.books;
+	}
 
 	/**
 	 * Get the {@link Shops} instance of this data node.
 	 * @return the {@link Shops}
 	 */
-	public Shops shops();
+	public Shops shops()
+	{
+		return this.shops;
+	}
 
 	/**
 	 * Get the {@link Customers} instance of this data node.
 	 * @return the {@link Customers}
 	 */
-	public Customers customers();
+	public Customers customers()
+	{
+		return this.customers;
+	}
 
 	/**
 	 * Get the {@link Purchases} instance of this data node.
 	 * @return the {@link Purchases}
 	 */
-	public Purchases purchases();
-
-
-	/**
-	 * Pseudo-constructor method to create a new {@link Data} instance with default implementation.
-	 *
-	 * @return a new {@link Data} instance.
-	 */
-	public static Data.Default New()
+	public Purchases purchases()
 	{
-		return new Default();
+		return this.purchases;
 	}
 
-
 	/**
-	 * Default implementation of the {@link Data} interface.
+	 * This method is used exclusively by the {@link BookStoreDemo}.
 	 */
-	public static class Default implements Data
+	public DataMetrics populate(
+		final RandomDataAmount       initialDataSize,
+		final EmbeddedStorageManager storageManager
+	)
 	{
-		private final Books.Default     books     = new Books.Default();
-		private final Shops.Default     shops     = new Shops.Default();
-		private final Customers.Default customers = new Customers.Default();
-		private final Purchases.Default purchases = new Purchases.Default();
-
-		Default()
-		{
-			super();
-		}
-
-		@Override
-		public Books books()
-		{
-			return this.books;
-		}
-
-		@Override
-		public Shops shops()
-		{
-			return this.shops;
-		}
-
-		@Override
-		public Customers customers()
-		{
-			return this.customers;
-		}
-
-		@Override
-		public Purchases purchases()
-		{
-			return this.purchases;
-		}
-
-
-		/**
-		 * This method is used exclusively by the {@link BookStoreDemo}
-		 * and it's not published by the {@link Data} interface.
-		 */
-		public DataMetrics populate(
-			final RandomDataAmount initialDataSize,
-			final EmbeddedStorageManager storageManager
+		return new RandomDataGenerator(
+			this.books,
+			this.shops,
+			this.customers,
+			this.purchases,
+			initialDataSize,
+			storageManager
 		)
-		{
-			return RandomDataGenerator.New(
-				this.books,
-				this.shops,
-				this.customers,
-				this.purchases,
-				initialDataSize,
-				storageManager
-			)
-			.generate();
-		}
-
+		.generate();
 	}
 
 }

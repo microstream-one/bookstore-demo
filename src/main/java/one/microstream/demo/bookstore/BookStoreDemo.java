@@ -3,7 +3,6 @@ package one.microstream.demo.bookstore;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.file.Paths;
 import java.util.Locale;
 
 import javax.money.CurrencyUnit;
@@ -21,10 +20,10 @@ import org.springframework.boot.SpringApplication;
 import one.microstream.demo.bookstore.data.Data;
 import one.microstream.demo.bookstore.data.DataMetrics;
 import one.microstream.demo.bookstore.data.RandomDataAmount;
-import one.microstream.jdk8.java.util.BinaryHandlersJDK8;
-import one.microstream.storage.configuration.Configuration;
-import one.microstream.storage.types.EmbeddedStorageFoundation;
-import one.microstream.storage.types.EmbeddedStorageManager;
+import one.microstream.persistence.binary.jdk8.types.BinaryHandlersJDK8;
+import one.microstream.storage.embedded.configuration.types.EmbeddedStorageConfiguration;
+import one.microstream.storage.embedded.types.EmbeddedStorageFoundation;
+import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 
 
 /**
@@ -55,12 +54,12 @@ public final class BookStoreDemo implements HasLogger
 	/**
 	 * {@link CurrencyUnit} for this demo, US Dollar is used as only currency.
 	 */
-	private static final CurrencyUnit         CURRENCY_UNIT          = Monetary.getCurrency(Locale.US);
+	public static final CurrencyUnit         CURRENCY_UNIT          = Monetary.getCurrency(Locale.US);
 
 	/**
 	 * Money format
 	 */
-	private final static MonetaryAmountFormat MONETARY_AMOUNT_FORMAT = MonetaryFormats.getAmountFormat(
+	public final static MonetaryAmountFormat MONETARY_AMOUNT_FORMAT = MonetaryFormats.getAmountFormat(
 		AmountFormatQueryBuilder.of(Locale.getDefault())
 			.set(CurrencyStyle.SYMBOL)
 			.build()
@@ -75,22 +74,6 @@ public final class BookStoreDemo implements HasLogger
 	private static BigDecimal scale(final BigDecimal number)
 	{
 		return number.setScale(2, RoundingMode.HALF_UP);
-	}
-
-	/**
-	 * @return the {@link CurrencyUnit} for this demo, US Dollar is used as only currency.
-	 */
-	public static CurrencyUnit currencyUnit()
-	{
-		return CURRENCY_UNIT;
-	}
-
-	/**
-	 * @return the {@link MonetaryAmountFormat} for this demo
-	 */
-	public static MonetaryAmountFormat monetaryAmountFormat()
-	{
-		return MONETARY_AMOUNT_FORMAT;
 	}
 
 	/**
@@ -110,7 +93,7 @@ public final class BookStoreDemo implements HasLogger
 	 */
 	public static MonetaryAmount money(final BigDecimal number)
 	{
-		return RoundedMoney.of(scale(number), currencyUnit());
+		return RoundedMoney.of(scale(number), CURRENCY_UNIT);
 	}
 
 	/**
@@ -176,15 +159,15 @@ public final class BookStoreDemo implements HasLogger
 	private EmbeddedStorageManager createStorageManager()
 	{
 		this.logger().info("Initializing MicroStream StorageManager");
+		
+		final EmbeddedStorageFoundation<?> foundation = EmbeddedStorageConfiguration.Builder()
+			.setStorageDirectory("data/storage")
+			.setChannelCount(Math.max(
+				1, // minimum one channel, if only 1 core is available
+				Integer.highestOneBit(Runtime.getRuntime().availableProcessors() - 1)
+			))
+			.createEmbeddedStorageFoundation();
 
-		final Configuration configuration = Configuration.Default();
-		configuration.setBaseDirectory(Paths.get("data", "storage").toString());
-		configuration.setChannelCount(Math.max(
-			1, // minimum one channel, if only 1 core is available
-			Integer.highestOneBit(Runtime.getRuntime().availableProcessors() - 1)
-		));
-
-		final EmbeddedStorageFoundation<?> foundation = configuration.createEmbeddedStorageFoundation();
 		foundation.onConnectionFoundation(BinaryHandlersJDK8::registerJDK8TypeHandlers);
 		final EmbeddedStorageManager storageManager = foundation.createEmbeddedStorageManager().start();
 
@@ -192,7 +175,7 @@ public final class BookStoreDemo implements HasLogger
 		{
 			this.logger().info("No data found, initializing random data");
 
-			final Data.Default data = Data.New();
+			final Data data = new Data();
 			storageManager.setRoot(data);
 			storageManager.storeRoot();
 			final DataMetrics metrics = data.populate(

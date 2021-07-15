@@ -10,195 +10,121 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
  * Non-reentrant read operations are not allowed until all write operations have been finished.
  * Additionally, a write operation can acquire the read lock, but not vice-versa.
  */
-public interface ReadWriteLocked
+public class ReadWriteLocked
 {
-	/**
-	 * Executes an operation protected by a read lock.
-	 *
-	 * @param <T> the operation's return type
-	 * @param operation the operation to execute
-	 * @return the operation's result
+	/*
+	 * Transient means it is not persisted by MicroStream, but created on demand.
 	 */
-	public <T> T read(ValueOperation<T> operation);
+	private transient volatile ReentrantReadWriteLock mutex;
 
-	/**
-	 * Executes an operation protected by a read lock.
-	 *
-	 * @param operation the operation to execute
-	 */
-	public void read(VoidOperation operation);
-
-	/**
-	 * Executes an operation protected by a write lock.
-	 *
-	 * @param <T> the operation's return type
-	 * @param operation the operation to execute
-	 * @return the operation's result
-	 */
-	public <T> T write(ValueOperation<T> operation);
-
-	/**
-	 * Executes an operation protected by a write lock.
-	 *
-	 * @param operation the operation to execute
-	 */
-	public void write(VoidOperation operation);
-
-
-	/**
-	 * Pseudo-constructor method to create a new {@link ReadWriteLocked}
-	 * instance with default implementation.
-	 *
-	 * @return a new {@link ReadWriteLocked} instance
-	 */
-	public static ReadWriteLocked New()
+	public ReadWriteLocked()
 	{
-		return new Default();
+		super();
 	}
-
-
-	/**
-	 * Default implementation of the {@link ReadWriteLocked} interface
-	 * which utilizes a {@link ReentrantReadWriteLock} for locking.
-	 *
-	 */
-	public static class Default implements ReadWriteLocked
-	{
-		private final ReentrantReadWriteLock mutex = new ReentrantReadWriteLock();
-
-		Default()
-		{
-			super();
-		}
-
-		@Override
-		public <T> T read(final ValueOperation<T> operation)
-		{
-			final ReadLock readLock = this.mutex.readLock();
-			readLock.lock();
-
-			try
-			{
-				return operation.execute();
-			}
-			finally
-			{
-				readLock.unlock();
-			}
-		}
-
-		@Override
-		public void read(final VoidOperation operation)
-		{
-			final ReadLock readLock = this.mutex.readLock();
-			readLock.lock();
-
-			try
-			{
-				operation.execute();
-			}
-			finally
-			{
-				readLock.unlock();
-			}
-		}
-
-		@Override
-		public <T> T write(final ValueOperation<T> operation)
-		{
-			final WriteLock writeLock = this.mutex.writeLock();
-			writeLock.lock();
-
-			try
-			{
-				return operation.execute();
-			}
-			finally
-			{
-				writeLock.unlock();
-			}
-		}
-
-		@Override
-		public void write(final VoidOperation operation)
-		{
-			final WriteLock writeLock = this.mutex.writeLock();
-			writeLock.lock();
-
-			try
-			{
-				operation.execute();
-			}
-			finally
-			{
-				writeLock.unlock();
-			}
-		}
-
-	}
-
-
-	/**
-	 * Abstract base class for {@link ReadWriteLocked} scopes.
-	 *
-	 */
-	public static abstract class Scope implements ReadWriteLocked
+	
+	private ReentrantReadWriteLock mutex()
 	{
 		/*
-		 * Transient means it is not persisted by MicroStream, but created on demand.
+		 * Double-checked locking to reduce the overhead of acquiring a lock
+		 * by testing the locking criterion.
+		 * The field (this.mutex) has to be volatile.
 		 */
-		private transient volatile ReadWriteLocked delegate;
-
-		protected Scope()
+		ReentrantReadWriteLock mutex = this.mutex;
+		if(mutex == null)
 		{
-			super();
-		}
-
-		protected ReadWriteLocked delegate()
-		{
-			/*
-			 * Double-checked locking to reduce the overhead of acquiring a lock
-			 * by testing the locking criterion.
-			 * The field (this.delegate) has to be volatile.
-			 */
-			ReadWriteLocked delegate = this.delegate;
-			if(delegate == null)
+			synchronized(this)
 			{
-				synchronized(this)
+				if((mutex = this.mutex) == null)
 				{
-					if((delegate = this.delegate) == null)
-					{
-						delegate = this.delegate = ReadWriteLocked.New();
-					}
+					mutex = this.mutex = new ReentrantReadWriteLock();
 				}
 			}
-			return delegate;
 		}
+		return mutex;
+	}
+	
+	/**
+	 * Executes an operation protected by a read lock.
+	 *
+	 * @param <T> the operation's return type
+	 * @param operation the operation to execute
+	 * @return the operation's result
+	 */
+	public final <T> T read(final ValueOperation<T> operation)
+	{
+		final ReadLock readLock = this.mutex().readLock();
+		readLock.lock();
 
-		@Override
-		public <T> T read(final ValueOperation<T> operation)
+		try
 		{
-			return this.delegate().read(operation);
+			return operation.execute();
 		}
-
-		@Override
-		public void read(final VoidOperation operation)
+		finally
 		{
-			this.delegate().read(operation);
+			readLock.unlock();
 		}
+	}
 
-		@Override
-		public <T> T write(final ValueOperation<T> operation)
+	/**
+	 * Executes an operation protected by a read lock.
+	 *
+	 * @param operation the operation to execute
+	 */
+	public final void read(final VoidOperation operation)
+	{
+		final ReadLock readLock = this.mutex().readLock();
+		readLock.lock();
+
+		try
 		{
-			return this.delegate().write(operation);
+			operation.execute();
 		}
-
-		@Override
-		public void write(final VoidOperation operation)
+		finally
 		{
-			this.delegate().write(operation);
+			readLock.unlock();
 		}
+	}
 
+	/**
+	 * Executes an operation protected by a write lock.
+	 *
+	 * @param <T> the operation's return type
+	 * @param operation the operation to execute
+	 * @return the operation's result
+	 */
+	public final <T> T write(final ValueOperation<T> operation)
+	{
+		final WriteLock writeLock = this.mutex().writeLock();
+		writeLock.lock();
+
+		try
+		{
+			return operation.execute();
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
+	 * Executes an operation protected by a write lock.
+	 *
+	 * @param operation the operation to execute
+	 */
+	public final void write(final VoidOperation operation)
+	{
+		final WriteLock writeLock = this.mutex().writeLock();
+		writeLock.lock();
+
+		try
+		{
+			operation.execute();
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
 	}
 
 }

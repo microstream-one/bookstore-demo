@@ -10,7 +10,7 @@ import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
 import one.microstream.persistence.types.Persister;
 import one.microstream.reference.Lazy;
-import one.microstream.storage.types.EmbeddedStorageManager;
+import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 
 /**
  * All retail shops operated by this company.
@@ -22,8 +22,18 @@ import one.microstream.storage.types.EmbeddedStorageManager;
  * @see Data#shops()
  * @see ReadWriteLocked
  */
-public interface Shops
+public class Shops extends ReadWriteLocked
 {
+	/**
+	 * Simple list to hold the shops.
+	 */
+	private final List<Shop> shops = new ArrayList<>(1024);
+
+	public Shops()
+	{
+		super();
+	}
+	
 	/**
 	 * Adds a new shop and stores it with the {@link BookStoreDemo}'s {@link EmbeddedStorageManager}.
 	 * <p>
@@ -31,7 +41,7 @@ public interface Shops
 	 *
 	 * @param shop the new shop
 	 */
-	public default void add(final Shop shop)
+	public void add(final Shop shop)
 	{
 		this.add(shop, BookStoreDemo.getInstance().storageManager());
 	}
@@ -43,7 +53,16 @@ public interface Shops
 	 * @param persister the persister to store it with
 	 * @see #add(Shop)
 	 */
-	public void add(Shop shop, Persister persister);
+	public void add(
+		final Shop      shop     ,
+		final Persister persister
+	)
+	{
+		this.write(() -> {
+			this.shops.add(shop);
+			persister.store(this.shops);
+		});
+	}
 
 	/**
 	 * Adds a range of new shops and stores it with the {@link BookStoreDemo}'s {@link EmbeddedStorageManager}.
@@ -52,7 +71,7 @@ public interface Shops
 	 *
 	 * @param shops the new shops
 	 */
-	public default void addAll(final Collection<? extends Shop> shops)
+	public void addAll(final Collection<? extends Shop> shops)
 	{
 		this.addAll(shops, BookStoreDemo.getInstance().storageManager());
 	}
@@ -64,14 +83,28 @@ public interface Shops
 	 * @param persister the persister to store them with
 	 * @see #addAll(Collection)
 	 */
-	public void addAll(Collection<? extends Shop> shops, Persister persister);
+	public void addAll(
+		final Collection<? extends Shop> shops    ,
+		final Persister                  persister
+	)
+	{
+		this.write(() -> {
+			this.shops.addAll(shops);
+			persister.store(this.shops);
+		});
+	}
 
 	/**
 	 * Gets the total amount of all shops.
 	 *
 	 * @return the amount of shops
 	 */
-	public int shopCount();
+	public int shopCount()
+	{
+		return this.read(
+			this.shops::size
+		);
+	}
 
 	/**
 	 * Gets all shops as a {@link List}.
@@ -79,7 +112,12 @@ public interface Shops
 	 *
 	 * @return all shops
 	 */
-	public List<Shop> all();
+	public List<Shop> all()
+	{
+		return this.read(() ->
+			new ArrayList<>(this.shops)
+		);
+	}
 
 	/**
 	 * Clears all {@link Lazy} references used by all shops.
@@ -87,7 +125,12 @@ public interface Shops
 	 *
 	 * @see Shop#clear()
 	 */
-	public void clear();
+	public void clear()
+	{
+		this.write(() ->
+			this.shops.forEach(Shop::clear)
+		);
+	}
 
 	/**
 	 * Executes a function with a {@link Stream} of {@link Shop}s and returns the computed value.
@@ -96,7 +139,14 @@ public interface Shops
 	 * @param streamFunction computing function
 	 * @return the computed result
 	 */
-	public <T> T compute(Function<Stream<Shop>, T> streamFunction);
+	public <T> T compute(final Function<Stream<Shop>, T> streamFunction)
+	{
+		return this.read(() ->
+			streamFunction.apply(
+				this.shops.parallelStream()
+			)
+		);
+	}
 
 	/**
 	 * Executes a function with a {@link Stream} of {@link InventoryItem}s and returns the computed value.
@@ -105,7 +155,18 @@ public interface Shops
 	 * @param streamFunction computing function
 	 * @return the computed result
 	 */
-	public <T> T computeInventory(Function<Stream<InventoryItem>, T> function);
+	public <T> T computeInventory(final Function<Stream<InventoryItem>, T> function)
+	{
+		return this.read(() ->
+			function.apply(
+				this.shops.parallelStream().flatMap(shop ->
+					shop.inventory().compute(entries ->
+						entries.map(entry -> new InventoryItem(shop, entry.getKey(), entry.getValue()))
+					)
+				)
+			)
+		);
+	}
 
 	/**
 	 * Gets the shop with a specific name or <code>null</code> if none was found.
@@ -113,113 +174,14 @@ public interface Shops
 	 * @param name the name to search by
 	 * @return the matching shop or <code>null</code>
 	 */
-	public Shop ofName(String name);
-
-
-	/**
-	 * Default implementation of the {@link Shops} interface.
-	 * <p>
-	 * It utilizes a {@link ReadWriteLocked.Scope} to ensure thread safe reads and writes.
-	 */
-	public static class Default extends ReadWriteLocked.Scope implements Shops
+	public Shop ofName(final String name)
 	{
-		/**
-		 * Simple list to hold the shops.
-		 */
-		private final List<Shop> shops = new ArrayList<>(1024);
-
-		Default()
-		{
-			super();
-		}
-
-		@Override
-		public void add(
-			final Shop shop,
-			final Persister persister
-		)
-		{
-			this.write(() -> {
-				this.shops.add(shop);
-				persister.store(this.shops);
-			});
-		}
-
-		@Override
-		public void addAll(
-			final Collection<? extends Shop> shops,
-			final Persister persister
-		)
-		{
-			this.write(() -> {
-				this.shops.addAll(shops);
-				persister.store(this.shops);
-			});
-		}
-
-		@Override
-		public int shopCount()
-		{
-			return this.read(
-				this.shops::size
-			);
-		}
-
-		@Override
-		public List<Shop> all()
-		{
-			return this.read(() ->
-				new ArrayList<>(this.shops)
-			);
-		}
-
-		@Override
-		public void clear()
-		{
-			this.write(() ->
-				this.shops.forEach(Shop::clear)
-			);
-		}
-
-		@Override
-		public <T> T compute(
-			final Function<Stream<Shop>, T> streamFunction
-		)
-		{
-			return this.read(() ->
-				streamFunction.apply(
-					this.shops.parallelStream()
-				)
-			);
-		}
-
-		@Override
-		public <T> T computeInventory(
-			final Function<Stream<InventoryItem>, T> function
-		)
-		{
-			return this.read(() ->
-				function.apply(
-					this.shops.parallelStream().flatMap(shop ->
-						shop.inventory().compute(entries ->
-							entries.map(entry -> InventoryItem.New(shop, entry.getKey(), entry.getValue()))
-						)
-					)
-				)
-			);
-		}
-
-		@Override
-		public Shop ofName(final String name)
-		{
-			return this.read(() ->
-				this.shops.stream()
-					.filter(shop -> shop.name().equals(name))
-					.findAny()
-					.orElse(null)
-			);
-		}
-
+		return this.read(() ->
+			this.shops.stream()
+				.filter(shop -> shop.name().equals(name))
+				.findAny()
+				.orElse(null)
+		);
 	}
 
 }

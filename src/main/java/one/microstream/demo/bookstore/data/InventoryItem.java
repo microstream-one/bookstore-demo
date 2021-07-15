@@ -10,92 +10,59 @@ import java.util.Objects;
  * This type is immutable and therefor inherently thread safe.
  *
  */
-public interface InventoryItem
+public class InventoryItem
 {
+	/**
+	 * Constructor to create a new {@link InventoryItem} instance.
+	 *
+	 * @param shop not <code>null</code>
+	 * @param book not <code>null</code>
+	 * @param amount positive amount
+	 */
+	private final Shop shop  ;
+	private final Book book  ;
+	private final int  amount;
+
+	public InventoryItem(
+		final Shop shop  ,
+		final Book book  ,
+		final int  amount
+	)
+	{
+		super();
+		this.shop   = Objects.requireNonNull(shop, () -> "Shop cannot be null");
+		this.book   = Objects.requireNonNull(book, () -> "Book cannot be null");
+		this.amount = requirePositive(amount, () -> "Amount must be greater than zero");
+	}
+	
 	/**
 	 * Get the shop which this inventory item belongs to
 	 *
 	 * @return the shop
 	 */
-	public Shop shop();
+	public Shop shop()
+	{
+		return this.shop;
+	}
 
 	/**
 	 * Get the book of this inventory item
 	 *
 	 * @return the book
 	 */
-	public Book book();
+	public Book book()
+	{
+		return this.book;
+	}
 
 	/**
 	 * Get the amount of this inventory item
 	 *
 	 * @return the amount
 	 */
-	public int amount();
-
-
-	/**
-	 * Pseudo-constructor method to create a new {@link InventoryItem} instance with default implementation.
-	 *
-	 * @param shop not <code>null</code>
-	 * @param book not <code>null</code>
-	 * @param amount positive amount
-	 * @return a new {@link InventoryItem} instance
-	 */
-	public static InventoryItem New(
-		final Shop shop,
-		final Book book,
-		final int amount
-	)
+	public int amount()
 	{
-		return new Default(
-			Objects.requireNonNull(shop, () -> "Shop cannot be null"),
-			Objects.requireNonNull(book, () -> "Book cannot be null"),
-			requirePositive(amount, () -> "Amount must be greater than zero")
-		);
-	}
-
-
-	/**
-	 * Default implementation of the {@link InventoryItem} interface.
-	 *
-	 */
-	public static class Default implements InventoryItem
-	{
-		private final Shop shop;
-		private final Book book;
-		private final int  amount;
-
-		Default(
-			final Shop shop,
-			final Book book,
-			final int amount
-		)
-		{
-			super();
-			this.shop   = shop;
-			this.book   = book;
-			this.amount = amount;
-		}
-
-		@Override
-		public Shop shop()
-		{
-			return this.shop;
-		}
-
-		@Override
-		public Book book()
-		{
-			return this.book;
-		}
-
-		@Override
-		public int amount()
-		{
-			return this.amount;
-		}
-
+		return this.amount;
 	}
 
 }

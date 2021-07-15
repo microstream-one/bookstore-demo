@@ -36,7 +36,6 @@ import one.microstream.demo.bookstore.ui.data.DoubleToMonetaryAmountConverter;
  * @see #open(Consumer)
  *
  */
-@SuppressWarnings("serial")
 public class DialogBookCreate extends Dialog
 {
 	/**
@@ -62,7 +61,7 @@ public class DialogBookCreate extends Dialog
 		super();
 
 		final TextField isbn13Field = new TextField(this.getTranslation("isbn13"));
-		isbn13Field.setPattern(Book.Validation.isbn13Pattern());
+		isbn13Field.setPattern(Book.isbn13Pattern());
 		isbn13Field.setValue(generateIsbn13());
 
 		final TextField titleField = new TextField(this.getTranslation("title"));
@@ -96,28 +95,28 @@ public class DialogBookCreate extends Dialog
 			.bind(Book::isbn13, setterDummy());
 		binder.forField(titleField)
 			.asRequired()
-			.withValidator(validator(Book.Validation::validateTitle))
+			.withValidator(validator(Book::validateTitle))
 			.bind(Book::title, setterDummy());
 		binder.forField(authorCombo)
 			.asRequired()
-			.withValidator(validator(Book.Validation::validateAuthor))
+			.withValidator(validator(Book::validateAuthor))
 			.bind(Book::author, setterDummy());
 		binder.forField(genreCombo)
 			.asRequired()
-			.withValidator(validator(Book.Validation::validateGenre))
+			.withValidator(validator(Book::validateGenre))
 			.bind(Book::genre, setterDummy());
 		binder.forField(publisherCombo)
 			.asRequired()
-			.withValidator(validator(Book.Validation::validatePublisher))
+			.withValidator(validator(Book::validatePublisher))
 			.bind(Book::publisher, setterDummy());
 		binder.forField(languageCombo)
 			.asRequired()
-			.withValidator(validator(Book.Validation::validateLanguage))
+			.withValidator(validator(Book::validateLanguage))
 			.bind(Book::language, setterDummy());
 		binder.forField(purchasePriceField)
 			.asRequired()
-			.withConverter(DoubleToMonetaryAmountConverter.New())
-			.withValidator(validator(Book.Validation::validatePrice))
+			.withConverter(new DoubleToMonetaryAmountConverter())
+			.withValidator(validator(Book::validatePrice))
 			.bind(Book::purchasePrice, setterDummy());
 
 		final FormLayout form = new FormLayout(
@@ -135,7 +134,7 @@ public class DialogBookCreate extends Dialog
 			if(binder.validate().isOk())
 			{
 				final MonetaryAmount purchasePrice = BookStoreDemo.money(purchasePriceField.getValue());
-				final Book book = Book.New(
+				final Book book = new Book(
 					isbn13Field.getValue(),
 					titleField.getValue(),
 					authorCombo.getValue(),
@@ -166,14 +165,14 @@ public class DialogBookCreate extends Dialog
 		String      isbn;
 		while(books.ofIsbn13(isbn = faker.code().isbn13(true)) != null)
 		{
-			; // empty loop
+			// empty loop
 		}
 		return isbn;
 	}
 
 	private String validateIsbn13(final String isbn13)
 	{
-		Book.Validation.validateIsbn13(isbn13);
+		Book.validateIsbn13(isbn13);
 		if(BookStoreDemo.getInstance().data().books().ofIsbn13(isbn13) != null)
 		{
 			throw new IllegalArgumentException(this.getTranslation("isbnAlreadyAssigned"));

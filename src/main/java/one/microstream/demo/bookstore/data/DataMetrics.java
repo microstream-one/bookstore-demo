@@ -1,69 +1,45 @@
 
 package one.microstream.demo.bookstore.data;
 
-public interface DataMetrics
+public class DataMetrics
 {
-	public int bookCount();
+	private final int bookCount   ;
+	private final int countryCount;
+	private final int shopCount   ;
 
-	public int countryCount();
-
-	public int shopCount();
-
-
-	public static DataMetrics New(
-		final int bookCount,
+	public DataMetrics(
+		final int bookCount   ,
 		final int countryCount,
 		final int shopCount
 	)
 	{
-		return new Default(bookCount, countryCount, shopCount);
+		super();
+		this.bookCount     = bookCount   ;
+		this.countryCount  = countryCount;
+		this.shopCount     = shopCount   ;
 	}
 
-
-	public static class Default implements DataMetrics
+	public int bookCount()
 	{
-		private final int    bookCount;
-		private final int    countryCount;
-		private final int    shopCount;
+		return this.bookCount;
+	}
 
-		Default(
-			final int bookCount,
-			final int countryCount,
-			final int shopCount
-		)
-		{
-			super();
-			this.bookCount     = bookCount;
-			this.countryCount  = countryCount;
-			this.shopCount     = shopCount;
-		}
+	public int countryCount()
+	{
+		return this.countryCount;
+	}
 
-		@Override
-		public int bookCount()
-		{
-			return this.bookCount;
-		}
+	public int shopCount()
+	{
+		return this.shopCount;
+	}
 
-		@Override
-		public int countryCount()
-		{
-			return this.countryCount;
-		}
-
-		@Override
-		public int shopCount()
-		{
-			return this.shopCount;
-		}
-
-		@Override
-		public String toString()
-		{
-			return this.bookCount + " books, "
-				+ this.shopCount + " shops in "
-				+ this.countryCount + " countries";
-		}
-
+	@Override
+	public String toString()
+	{
+		return this.bookCount   + " books, "
+			+ this.shopCount    + " shops in "
+			+ this.countryCount + " countries";
 	}
 
 }

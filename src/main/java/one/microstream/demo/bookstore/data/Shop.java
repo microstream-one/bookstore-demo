@@ -1,8 +1,6 @@
 
 package one.microstream.demo.bookstore.data;
 
-import static one.microstream.demo.bookstore.data.Named.Validation.validateName;
-import static one.microstream.demo.bookstore.data.NamedWithAddress.Validation.validateAddress;
 import static one.microstream.demo.bookstore.util.LazyUtils.clearIfStored;
 
 import java.util.ArrayList;
@@ -17,97 +15,70 @@ import one.microstream.reference.Lazy;
  * This type is immutable and therefor inherently thread safe.
  *
  */
-public interface Shop extends NamedWithAddress
+public class Shop extends NamedWithAddress
 {
+	private final List<Employee>  employees;
+	private final Lazy<Inventory> inventory;
+	
+	/**
+	 * Constructor to create a new {@link Shop} instance.
+	 *
+	 * @param name not empty, {@link Named.Validation#validateName(String)}
+	 * @param address not <code>null</code>
+	 */
+	public Shop(
+		final String  name   ,
+		final Address address
+	)
+	{
+		super(name, address);
+		
+		this.employees = new ArrayList<>();
+		this.inventory = Lazy.Reference(new Inventory());
+	}
+	
+	/**
+	 * Package-private constructor used by {@link RandomDataGenerator}
+	 */
+	Shop(
+		final String         name     ,
+		final Address        address  ,
+		final List<Employee> employees,
+		final Inventory      inventory
+	)
+	{
+		super(name, address);
+		this.employees = new ArrayList<>(employees);
+		this.inventory = Lazy.Reference(inventory);
+	}
+	
 	/**
 	 * Get the employees.
 	 *
 	 * @return a {@link Stream} of {@link Employee}s
 	 */
-	public Stream<Employee> employees();
+	public Stream<Employee> employees()
+	{
+		return this.employees.stream();
+	}
 
 	/**
 	 * Get the inventory.
 	 *
 	 * @return the inventory
 	 */
-	public Inventory inventory();
+	public Inventory inventory()
+	{
+		return this.inventory.get();
+	}
 
 	/**
 	 * Clears all {@link Lazy} references held by this shop.
 	 * This frees the used memory but you do not lose the persisted data. It is loaded again on demand.
 	 */
-	public void clear();
-
-
-	/**
-	 * Pseudo-constructor method to create a new {@link Shop} instance with default implementation.
-	 *
-	 * @param name not empty, {@link Named.Validation#validateName(String)}
-	 * @param address not <code>null</code>
-	 * @return a new {@link Shop} instance
-	 */
-	public static Shop New(
-		final String name,
-		final Address address
-	)
+	public void clear()
 	{
-		return new Default(
-			validateName(name),
-			validateAddress(address)
-		);
-	}
-
-
-	/**
-	 * Default implementation of the {@link Shop} interface.
-	 *
-	 */
-	public static class Default extends NamedWithAddress.Abstract implements Shop
-	{
-		private final List<Employee>  employees;
-		private final Lazy<Inventory> inventory;
-
-		Default(
-			final String name,
-			final Address address
-		)
-		{
-			super(name, address);
-			this.employees = new ArrayList<>();
-			this.inventory = Lazy.Reference(new Inventory.Default());
-		}
-
-		Default(
-			final String name,
-			final Address address,
-			final List<Employee> employees,
-			final Inventory inventory
-		)
-		{
-			super(name, address);
-			this.employees = new ArrayList<>(employees);
-			this.inventory = Lazy.Reference(inventory);
-		}
-
-		@Override
-		public Stream<Employee> employees()
-		{
-			return this.employees.stream();
-		}
-
-		@Override
-		public Inventory inventory()
-		{
-			return this.inventory.get();
-		}
-
-		@Override
-		public void clear()
-		{
-			clearIfStored(this.inventory);
-		}
-
+		clearIfStored(this.inventory);
 	}
 
 }

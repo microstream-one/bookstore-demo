@@ -12,50 +12,35 @@ import one.microstream.demo.bookstore.BookStoreDemo;
  * A {@link Converter} that converts from {@link Double} to {@link MonetaryAmount} and back.
  *
  */
-@SuppressWarnings("serial")
-public interface DoubleToMonetaryAmountConverter extends Converter<Double, MonetaryAmount>
+public class DoubleToMonetaryAmountConverter implements Converter<Double, MonetaryAmount>
 {
-	/**
-	 * Pseudo-constructor method to create a new {@link DoubleToMonetaryAmountConverter}
-	 * instance with default implementation.
-	 *
-	 * @return a new {@link DoubleToMonetaryAmountConverter}
-	 */
-	public static DoubleToMonetaryAmountConverter New()
+	public DoubleToMonetaryAmountConverter()
 	{
-		return new Default();
+		super();
 	}
 
-
-	/**
-	 * Default implementation of the {@link DoubleToMonetaryAmountConverter} interface.
-	 *
-	 */
-	public class Default implements DoubleToMonetaryAmountConverter
+	@Override
+	public Result<MonetaryAmount> convertToModel(
+		final Double       value  ,
+		final ValueContext context
+	)
 	{
-		Default()
-		{
-			super();
-		}
+		return Result.ok(value != null
+			? BookStoreDemo.money(value)
+			: null
+		);
+	}
 
-		@Override
-		public Result<MonetaryAmount> convertToModel(final Double value, final ValueContext context)
-		{
-			return Result.ok(value != null
-				? BookStoreDemo.money(value)
-				: null
-			);
-		}
-
-		@Override
-		public Double convertToPresentation(final MonetaryAmount value, final ValueContext context)
-		{
-			return value != null
-				? value.getNumber().doubleValue()
-				: null
-			;
-		}
-
+	@Override
+	public Double convertToPresentation(
+		final MonetaryAmount value  ,
+		final ValueContext   context
+	)
+	{
+		return value != null
+			? value.getNumber().doubleValue()
+			: null
+		;
 	}
 
 }

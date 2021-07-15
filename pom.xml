@@ -39,7 +39,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<microstream.version>04.01.00-MS-GA</microstream.version>
+		<microstream.version>05.00.00-MS-GA</microstream.version>
 		<lucene.version>8.8.2</lucene.version>
 		<vaadin.version>14.5.3</vaadin.version>
 	</properties>
@@ -70,17 +70,17 @@
 	<dependencies>
 		<dependency>
 			<groupId>one.microstream</groupId>
-			<artifactId>storage.embedded</artifactId>
+			<artifactId>microstream-storage-embedded</artifactId>
 			<version>${microstream.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>one.microstream</groupId>
-			<artifactId>storage.embedded.configuration</artifactId>
+			<artifactId>microstream-storage-embedded-configuration</artifactId>
 			<version>${microstream.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>one.microstream</groupId>
-			<artifactId>persistence.binary.jdk8</artifactId>
+			<artifactId>microstream-persistence-binary-jdk8</artifactId>
 			<version>${microstream.version}</version>
 		</dependency>
 		<dependency>

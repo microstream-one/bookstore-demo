@@ -1,6 +1,5 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import static one.microstream.demo.bookstore.BookStoreDemo.monetaryAmountFormat;
 import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetary;
 
 import java.time.Year;
@@ -26,7 +25,7 @@ import com.vaadin.flow.router.Route;
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Customer;
 import one.microstream.demo.bookstore.data.Purchase;
-import one.microstream.demo.bookstore.data.Purchase.Item;
+import one.microstream.demo.bookstore.data.PurchaseItem;
 import one.microstream.demo.bookstore.data.Purchases;
 import one.microstream.demo.bookstore.data.Shop;
 import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
@@ -36,7 +35,6 @@ import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
  *
  */
 @Route(value = "purchases", layout = RootLayout.class)
-@SuppressWarnings("serial")
 public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParameter<String>
 {
 	int      year = Year.now().getValue();
@@ -71,6 +69,7 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 			}
 			catch(final NumberFormatException e)
 			{
+				// swallow
 			}
 		}
 	}
@@ -110,14 +109,14 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 
 	private Component createPurchaseDetails(final Purchase purchase)
 	{
-		final Grid<Purchase.Item> grid = createGrid();
+		final Grid<PurchaseItem> grid = createGrid();
 		addGridColumn(grid, this.getTranslation("isbn13")   , item -> item.book().isbn13()          );
 		addGridColumn(grid, this.getTranslation("book")     , item -> item.book().title()           );
 		addGridColumn(grid, this.getTranslation("author")   , item -> item.book().author().name()   );
 		addGridColumn(grid, this.getTranslation("publisher"), item -> item.book().publisher().name());
-		addGridColumn(grid, this.getTranslation("price")    , moneyRenderer(Item::price)            );
-		addGridColumn(grid, this.getTranslation("amount")   , Item::amount                          );
-		addGridColumn(grid, this.getTranslation("total")    , moneyRenderer(Item::itemTotal)        );
+		addGridColumn(grid, this.getTranslation("price")    , moneyRenderer(PurchaseItem::price)            );
+		addGridColumn(grid, this.getTranslation("amount")   , PurchaseItem::amount                          );
+		addGridColumn(grid, this.getTranslation("total")    , moneyRenderer(PurchaseItem::itemTotal)        );
 		grid.setDataProvider(DataProvider.fromStream(purchase.items()));
 		grid.setHeightByRows(true);
 		return grid;
@@ -142,9 +141,9 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 	{
 		final MonetarySummaryStatistics stats = this.dataProvider.fetch(new Query<>())
 			.map(Purchase::total)
-			.collect(summarizingMonetary(BookStoreDemo.currencyUnit()));
+			.collect(summarizingMonetary(BookStoreDemo.CURRENCY_UNIT));
 		this.totalColumnFooter.setText(
-			monetaryAmountFormat().format(stats.getSum())
+			BookStoreDemo.MONETARY_AMOUNT_FORMAT.format(stats.getSum())
 		);
 	}
 

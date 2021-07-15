@@ -1,8 +1,6 @@
 
 package one.microstream.demo.bookstore.data;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.Locale;
 
 
@@ -12,72 +10,30 @@ import java.util.Locale;
  * This type is immutable and therefor inherently thread safe.
  *
  */
-public interface Language extends Named
+public class Language extends Named
 {
+	private final Locale locale;
+	
+	/**
+	 * Constructor to create a new {@link Language} instance.
+	 *
+	 * @param locale not <code>null</code>
+	 */
+	public Language(final Locale locale)
+	{
+		super(locale.getDisplayLanguage());
+		
+		this.locale = locale;
+	}
+	
 	/**
 	 * Get the locale.
 	 *
 	 * @return the locale
 	 */
-	public Locale locale();
-
-	/**
-	 * Get the display language of {@link #locale()}.
-	 *
-	 * @return the locale's display language
-	 * @see Locale#getDisplayLanguage()
-	 */
-	@Override
-	public default String name()
+	public Locale locale()
 	{
-		return this.locale().getDisplayLanguage();
-	}
-
-
-	/**
-	 * Pseudo-constructor method to create a new {@link Language} instance with default implementation.
-	 *
-	 * @param locale not <code>null</code>
-	 * @return a new {@link Language} instance
-	 */
-	public static Language New(
-		final Locale locale
-	)
-	{
-		return new Default(
-			requireNonNull(locale, () -> "Locale cannot be null")
-		);
-	}
-
-
-	/**
-	 * Default implementation of the {@link Language} interface.
-	 *
-	 */
-	public static class Default implements Language
-	{
-		private final Locale locale;
-
-		Default(
-			final Locale locale
-		)
-		{
-			super();
-			this.locale = locale;
-		}
-
-		@Override
-		public Locale locale()
-		{
-			return this.locale;
-		}
-
-		@Override
-		public String toString()
-		{
-			return "Language [" + this.name() + "]";
-		}
-
+		return this.locale;
 	}
 
 }
