@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.2.RELEASE</version>
+		<version>2.2.13.RELEASE</version>
 	</parent>
 
 	<groupId>one.microstream</groupId>
@@ -39,9 +39,9 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<microstream.version>05.00.00-MS-GA</microstream.version>
-		<lucene.version>8.8.2</lucene.version>
-		<vaadin.version>14.5.3</vaadin.version>
+		<microstream.version>05.00.02-MS-GA</microstream.version>
+		<lucene.version>8.9.0</lucene.version>
+		<vaadin.version>14.6.6</vaadin.version>
 	</properties>
 
 	<repositories>
@@ -97,7 +97,7 @@
 		<dependency>
 			<groupId>com.github.javafaker</groupId>
 			<artifactId>javafaker</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
