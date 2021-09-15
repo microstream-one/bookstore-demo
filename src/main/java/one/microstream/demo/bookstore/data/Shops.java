@@ -10,7 +10,7 @@ import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
 import one.microstream.persistence.types.Persister;
 import one.microstream.reference.Lazy;
-import one.microstream.storage.types.EmbeddedStorageManager;
+import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 
 /**
  * All retail shops operated by this company.

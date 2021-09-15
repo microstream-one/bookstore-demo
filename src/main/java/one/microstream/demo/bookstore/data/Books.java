@@ -22,7 +22,7 @@ import one.microstream.demo.bookstore.data.Index.DocumentPopulator;
 import one.microstream.demo.bookstore.data.Index.EntityMatcher;
 import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
 import one.microstream.persistence.types.Persister;
-import one.microstream.storage.types.EmbeddedStorageManager;
+import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 
 /**
  * Range of all books sold by this company.

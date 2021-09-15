@@ -39,16 +39,12 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<microstream.version>04.00.00-MS-GA</microstream.version>
+		<microstream.version>05.00.02-MS-GA</microstream.version>
 		<lucene.version>8.5.1</lucene.version>
 		<vaadin.version>14.2.0</vaadin.version>
 	</properties>
 
 	<repositories>
-		<repository>
-			<id>microstream-maven-releases</id>
-			<url>https://repo.microstream.one/repository/maven-public/</url>
-		</repository>
 		<repository>
 			<id>vaadin-addons</id>
 			<url>https://maven.vaadin.com/vaadin-addons</url>
@@ -70,17 +66,17 @@
 	<dependencies>
 		<dependency>
 			<groupId>one.microstream</groupId>
-			<artifactId>storage.embedded</artifactId>
+			<artifactId>microstream-storage-embedded</artifactId>
 			<version>${microstream.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>one.microstream</groupId>
-			<artifactId>storage.embedded.configuration</artifactId>
+			<artifactId>microstream-storage-embedded-configuration</artifactId>
 			<version>${microstream.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>one.microstream</groupId>
-			<artifactId>persistence.binary.jdk8</artifactId>
+			<artifactId>microstream-persistence-binary-jdk8</artifactId>
 			<version>${microstream.version}</version>
 		</dependency>
 		<dependency>

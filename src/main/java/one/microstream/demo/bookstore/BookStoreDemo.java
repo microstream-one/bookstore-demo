@@ -21,10 +21,10 @@ import org.springframework.boot.SpringApplication;
 import one.microstream.demo.bookstore.data.Data;
 import one.microstream.demo.bookstore.data.DataMetrics;
 import one.microstream.demo.bookstore.data.RandomDataAmount;
-import one.microstream.jdk8.java.util.BinaryHandlersJDK8;
+import one.microstream.persistence.binary.jdk8.types.BinaryHandlersJDK8;
 import one.microstream.storage.configuration.Configuration;
-import one.microstream.storage.types.EmbeddedStorageFoundation;
-import one.microstream.storage.types.EmbeddedStorageManager;
+import one.microstream.storage.embedded.types.EmbeddedStorageFoundation;
+import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 
 
 /**

@@ -32,7 +32,7 @@ import one.microstream.demo.bookstore.util.concurrent.ReadWriteLocked;
 import one.microstream.demo.bookstore.util.concurrent.ReadWriteLockedStriped;
 import one.microstream.persistence.types.Persister;
 import one.microstream.reference.Lazy;
-import one.microstream.storage.types.EmbeddedStorageManager;
+import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 
 /**
  * All purchases made by all customers in all stores.

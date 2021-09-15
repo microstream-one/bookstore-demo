@@ -2,7 +2,7 @@
 package one.microstream.demo.bookstore.data;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
-import one.microstream.storage.types.EmbeddedStorageManager;
+import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 
 /**
  * Root object for all data used by this application.
