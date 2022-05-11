@@ -1,8 +1,5 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.flowingcode.vaadin.addons.ironicons.IronIcons;
 import com.flowingcode.vaadin.addons.ironicons.SocialIcons;
 import com.github.appreciated.app.layout.component.applayout.LeftLayouts;
@@ -17,8 +14,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.Push;
-import com.vaadin.flow.server.InitialPageSettings;
-import com.vaadin.flow.server.PageConfigurator;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
@@ -30,9 +25,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @CssImport("./styles/shared-styles.css")
 @SuppressWarnings("serial")
-public class RootLayout
-	extends AppLayoutRouterLayout<LeftLayouts.LeftResponsive>
-	implements PageConfigurator
+public class RootLayout extends AppLayoutRouterLayout<LeftLayouts.LeftResponsive>
 {
 	public RootLayout()
 	{
@@ -63,29 +56,6 @@ public class RootLayout
 			)
 			.build()
 		);
-	}
-
-	@Override
-	public void configurePage(
-		final InitialPageSettings settings
-	)
-	{
-		addLink(settings, "frontend/images/favicon.svg", "rel", "icon", "type", "image/svg+xml");
-		addLink(settings, "frontend/images/favicon.ico", "rel", "alternate icon");
-	}
-
-	private static void addLink(
-		final InitialPageSettings settings,
-		final String href,
-		final String... attributes
-	)
-	{
-		final Map<String, String> map = new HashMap<>();
-		for(int i = 0; i < attributes.length; )
-		{
-			map.put(attributes[i++], attributes[i++]);
-		}
-		settings.addLink(href, map);
 	}
 
 }

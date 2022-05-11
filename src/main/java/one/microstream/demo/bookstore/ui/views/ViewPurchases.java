@@ -118,7 +118,7 @@ public class ViewPurchases extends ViewEntity<Purchase> implements HasUrlParamet
 		addGridColumn(grid, this.getTranslation("amount")   , PurchaseItem::amount                          );
 		addGridColumn(grid, this.getTranslation("total")    , moneyRenderer(PurchaseItem::itemTotal)        );
 		grid.setDataProvider(DataProvider.fromStream(purchase.items()));
-		grid.setHeightByRows(true);
+		grid.setAllRowsVisible(true);
 		return grid;
 	}
 
