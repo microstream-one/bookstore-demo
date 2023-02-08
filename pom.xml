@@ -41,7 +41,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<microstream.version>07.00.00-MS-GA</microstream.version>
 		<lucene.version>8.11.1</lucene.version>
-		<vaadin.version>14.8.10</vaadin.version>
+		<vaadin.version>23.3.5</vaadin.version>
 	</properties>
 
 	<repositories>
@@ -136,7 +136,7 @@
 		<dependency>
 			<groupId>com.github.appreciated</groupId>
 			<artifactId>app-layout-addon</artifactId>
-			<version>4.0.0</version>
+			<version>21.0.0-beta1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.flowingcode.addons</groupId>

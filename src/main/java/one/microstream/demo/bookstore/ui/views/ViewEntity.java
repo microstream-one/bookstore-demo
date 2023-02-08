@@ -247,7 +247,7 @@ public abstract class ViewEntity<E> extends VerticalLayout
 			@Override
 			public boolean isInMemory()
 			{
-				return ViewEntity.this.dataProvider.isInMemory();
+                                return false;
 			}
 		});
 		this.markAsDynamic(combo);

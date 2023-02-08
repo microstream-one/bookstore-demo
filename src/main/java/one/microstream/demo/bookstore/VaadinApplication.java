@@ -1,8 +1,11 @@
 package one.microstream.demo.bookstore;
 
+import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 /**
  * Entry point for the demo application variant with a Vaadin UI.
@@ -13,7 +16,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  * {@link VaadinApplicationConfiguration#getBookStoreDemo()}.
  */
 @SpringBootApplication
-public class VaadinApplication extends SpringBootServletInitializer
+@Push
+@Theme(themeClass = Lumo.class, variant = Lumo.DARK)
+public class VaadinApplication implements AppShellConfigurator
 {
 	public static void main(
 		final String[] args

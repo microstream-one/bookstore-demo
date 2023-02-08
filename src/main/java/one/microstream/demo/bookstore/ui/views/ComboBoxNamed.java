@@ -53,12 +53,4 @@ public class ComboBoxNamed<T extends Named> extends ComboBox<T>
 		return this;
 	}
 
-	@Override
-	public void setItems(final Collection<T> items)
-	{
-		this.setDataProvider(
-			DataProvider.ofCollection(items),
-			filterText -> entity -> StringUtils.containsIgnoreCase(entity.name(), filterText)
-		);
-	}
 }
