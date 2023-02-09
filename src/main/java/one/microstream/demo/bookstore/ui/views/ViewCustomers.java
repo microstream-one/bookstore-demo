@@ -1,18 +1,15 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.flowingcode.vaadin.addons.ironicons.IronIcons;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.QueryParameters;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
-
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Customer;
 import one.microstream.demo.bookstore.data.Customers;
-import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
+
+import java.util.stream.Stream;
 
 /**
  * View to display {@link Customers}.
@@ -30,7 +27,7 @@ public class ViewCustomers extends ViewNamedWithAddress<Customer>
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumn(this.getTranslation("id"), Customer::customerId);
+		this.addGridColumn("id", Customer::customerId);
 		this.addGridColumnForName();
 		this.addGridColumnsForAddress();
 
@@ -50,16 +47,13 @@ public class ViewCustomers extends ViewNamedWithAddress<Customer>
 	}
 
 	@Override
-	protected Backend<Customer> backend()
-	{
-		return BookStoreDemo.getInstance().data().customers()::compute;
+	public <R> R compute(SerializableFunction<Stream<Customer>, R> function) {
+		return BookStoreDemo.getInstance().data().customers().compute(function);
 	}
 
 	private void showPurchases(final Customer customer)
 	{
-		final Map<String, String> params = new HashMap<>();
-		params.put("customer", Integer.toString(customer.customerId()));
-		this.getUI().get().navigate("purchases", QueryParameters.simple(params));
+		getUI().get().navigate(ViewPurchases.class).get().filterBy(customer);
 	}
 
 }

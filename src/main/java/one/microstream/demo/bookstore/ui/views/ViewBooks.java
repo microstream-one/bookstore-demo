@@ -1,18 +1,15 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.QueryParameters;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
-
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Book;
 import one.microstream.demo.bookstore.data.Books;
-import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
+
+import java.util.stream.Stream;
 
 /**
  * View to display and modify {@link Books}.
@@ -30,12 +27,12 @@ public class ViewBooks extends ViewEntity<Book>
 	@Override
 	protected void createUI()
 	{
-		this.addGridColumnWithTextFilter   (this.getTranslation("title")    , Book::title    );
-		this.addGridColumnWithDynamicFilter(this.getTranslation("author")   , Book::author   );
-		this.addGridColumnWithDynamicFilter(this.getTranslation("genre")    , Book::genre    );
-		this.addGridColumnWithDynamicFilter(this.getTranslation("publisher"), Book::publisher);
-		this.addGridColumnWithDynamicFilter(this.getTranslation("language") , Book::language );
-		this.addGridColumnWithTextFilter   (this.getTranslation("isbn13")   , Book::isbn13   );
+		this.addGridColumnWithTextFilter   ("title"    , Book::title    );
+		this.addGridColumnWithDynamicFilter("author"   , Book::author   );
+		this.addGridColumnWithDynamicFilter("genre"    , Book::genre    );
+		this.addGridColumnWithDynamicFilter("publisher", Book::publisher);
+		this.addGridColumnWithDynamicFilter("language" , Book::language );
+		this.addGridColumnWithTextFilter   ("isbn13"   , Book::isbn13   );
 
 		final Button showInventoryButton = new Button(
 			this.getTranslation("showInventory"),
@@ -59,9 +56,7 @@ public class ViewBooks extends ViewEntity<Book>
 
 	private void showInventory(final Book book)
 	{
-		final Map<String, String> params = new HashMap<>();
-		params.put("book", book.isbn13());
-		this.getUI().get().navigate("inventory", QueryParameters.simple(params));
+		getUI().get().navigate(ViewInventory.class).get().filterBy(book);
 	}
 
 	private void openCreateBookDialog()
@@ -69,14 +64,14 @@ public class ViewBooks extends ViewEntity<Book>
 		DialogBookCreate.open(book ->
 		{
 			BookStoreDemo.getInstance().data().books().add(book);
-			this.refresh();
+			listEntities();
 		});
 	}
 
-	@Override
-	protected Backend<Book> backend()
-	{
-		return BookStoreDemo.getInstance().data().books()::compute;
-	}
 
+
+	@Override
+	public <R> R compute(SerializableFunction<Stream<Book>, R> function) {
+		return BookStoreDemo.getInstance().data().books().compute(function);
+	}
 }
