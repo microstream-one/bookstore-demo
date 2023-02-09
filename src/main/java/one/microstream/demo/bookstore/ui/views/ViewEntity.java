@@ -85,7 +85,13 @@ public abstract class ViewEntity<E> extends VerticalLayout
 				}
 				return stream.skip(q.getOffset())
 						.limit(q.getLimit());
-			});
+			})
+					/*
+					 * Without following hack there seems to be an NPA thrown
+					 * from somewhere from Vaadin internals, when scrolled fast
+					 * on e.g. Inventory view. To be investigated...
+					 */
+					.collect(Collectors.toList()).stream();
 		});
 	}
 
