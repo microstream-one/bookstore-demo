@@ -39,4 +39,9 @@ public class FilterTextField<E> extends TextField implements FilterField<E, Stri
 			: filter
 		;
 	}
+
+	@Override
+	public void updateOptions() {
+		// NOOP
+	}
 }

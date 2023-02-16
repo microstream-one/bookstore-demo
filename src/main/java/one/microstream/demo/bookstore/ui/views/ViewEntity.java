@@ -93,8 +93,9 @@ public abstract class ViewEntity<E> extends VerticalLayout
 					 */
 					.collect(Collectors.toList()).stream();
 		});
+		filterFields.forEach(f -> f.updateOptions());
 	}
-
+	
 	protected abstract void createUI();
 
 
@@ -209,9 +210,9 @@ public abstract class ViewEntity<E> extends VerticalLayout
 			value -> entity -> valueProvider.apply(entity) == value
 		);
 
-
 		combo.setItems(query -> {
-			return compute(s -> s.map(valueProvider))
+			return compute(s -> s.filter(getPredicate())
+					.map(valueProvider))
 					.distinct()
 					.filter(f -> StringUtils.containsIgnoreCase(f.name(), query.getFilter().get()))
 					.skip(query.getOffset())
