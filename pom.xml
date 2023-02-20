@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.13.RELEASE</version>
+		<version>2.7.8</version>
 	</parent>
 
 	<groupId>one.microstream</groupId>
@@ -35,13 +35,11 @@
 	</developers>
 
 	<properties>
-		<java.version>1.8</java.version>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<java.version>17</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<microstream.version>07.00.00-MS-GA</microstream.version>
 		<lucene.version>8.11.1</lucene.version>
-		<vaadin.version>14.8.10</vaadin.version>
+		<vaadin.version>23.3.5</vaadin.version>
 	</properties>
 
 	<repositories>
@@ -98,6 +96,12 @@
 			<groupId>com.github.javafaker</groupId>
 			<artifactId>javafaker</artifactId>
 			<version>1.0.2</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>org.yaml</groupId>
+                                <artifactId>snakeyaml</artifactId>
+                            </exclusion>
+                        </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
@@ -121,16 +125,16 @@
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-core</artifactId>
+			<artifactId>vaadin-spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-spring-boot-starter</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.appreciated</groupId>
 			<artifactId>app-layout-addon</artifactId>
-			<version>4.0.0</version>
+			<version>21.0.0-beta1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.flowingcode.addons</groupId>
@@ -140,7 +144,6 @@
 		<dependency>
 			<groupId>com.graphql-java</groupId>
 			<artifactId>graphql-java</artifactId>
-			<version>15.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.graphql-java</groupId>

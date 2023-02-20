@@ -19,6 +19,6 @@ public abstract class ViewNamed<E extends Named> extends ViewEntity<E>
 
 	protected void addGridColumnForName()
 	{
-		this.addGridColumnWithTextFilter(this.getTranslation("name"), Named::name);
+		this.addGridColumnWithTextFilter("name", Named::name);
 	}
 }

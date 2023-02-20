@@ -41,4 +41,9 @@ public class FilterComboBox<E, F extends Named> extends ComboBoxNamed<F> impleme
 			: filter
 		;
 	}
+
+	@Override
+	public void updateOptions() {
+		getDataProvider().refreshAll();
+	}
 }

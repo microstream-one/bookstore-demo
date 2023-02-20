@@ -8,22 +8,19 @@ import com.github.appreciated.app.layout.component.menu.left.builder.LeftAppMenu
 import com.github.appreciated.app.layout.component.menu.left.items.LeftNavigationItem;
 import com.github.appreciated.app.layout.component.router.AppLayoutRouterLayout;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.page.Push;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
  * Root layout for all views, containing the main menu.
  *
  */
-@Push
-@Theme(value = Lumo.class, variant = Lumo.DARK)
 @CssImport("./styles/shared-styles.css")
+@NpmPackage(value = "@vaadin/vaadin-element-mixin", version = "21.0.5") // needed as the app layout add-on in use is not perfectly compatible with v23
 @SuppressWarnings("serial")
 public class RootLayout extends AppLayoutRouterLayout<LeftLayouts.LeftResponsive>
 {

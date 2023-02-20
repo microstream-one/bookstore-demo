@@ -27,7 +27,7 @@ public class FilterTextField<E> extends TextField implements FilterField<E, Stri
 
 		this.setPlaceholder(this.getTranslation("filter"));
 		this.setClearButtonVisible(true);
-		this.setValueChangeMode(ValueChangeMode.TIMEOUT);
+		this.setValueChangeMode(ValueChangeMode.LAZY);
 	}
 
 	@Override
@@ -38,5 +38,10 @@ public class FilterTextField<E> extends TextField implements FilterField<E, Stri
 			? filter.and(this.filterFactory.apply(value))
 			: filter
 		;
+	}
+
+	@Override
+	public void updateOptions() {
+		// NOOP
 	}
 }

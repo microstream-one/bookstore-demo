@@ -1,19 +1,17 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.stream.Stream;
 
 import com.flowingcode.vaadin.addons.ironicons.IronIcons;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.QueryParameters;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
 
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Shop;
 import one.microstream.demo.bookstore.data.Shops;
-import one.microstream.demo.bookstore.ui.data.BookStoreDataProvider.Backend;
 
 /**
  * View to display {@link Shops}.
@@ -58,22 +56,17 @@ public class ViewShops extends ViewNamedWithAddress<Shop>
 
 	private void showInventory(final Shop shop)
 	{
-		final Map<String, String> params = new HashMap<>();
-		params.put("shop", shop.name());
-		this.getUI().get().navigate("inventory", QueryParameters.simple(params));
+		getUI().get().navigate(ViewInventory.class).get().filterBy(shop);
 	}
 
 	private void showPurchases(final Shop shop)
 	{
-		final Map<String, String> params = new HashMap<>();
-		params.put("shop", shop.name());
-		this.getUI().get().navigate("purchases", QueryParameters.simple(params));
+		getUI().get().navigate(ViewPurchases.class).get().filterBy(shop);
 	}
 
 	@Override
-	protected Backend<Shop> backend()
-	{
-		return BookStoreDemo.getInstance().data().shops()::compute;
+	public <R> R compute(SerializableFunction<Stream<Shop>, R> function) {
+		return BookStoreDemo.getInstance().data().shops().compute(function);
 	}
 
 }
