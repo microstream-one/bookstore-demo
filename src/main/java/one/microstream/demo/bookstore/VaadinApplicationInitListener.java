@@ -3,8 +3,6 @@ package one.microstream.demo.bookstore;
 import org.jsoup.nodes.Element;
 import org.rapidpm.dependencies.core.logger.HasLogger;
 
-import com.vaadin.flow.server.BootstrapListener;
-import com.vaadin.flow.server.BootstrapPageResponse;
 import com.vaadin.flow.server.ServiceException;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.SessionInitEvent;
@@ -17,7 +15,7 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
  */
 @SuppressWarnings("serial")
 public class VaadinApplicationInitListener
-implements VaadinServiceInitListener, SessionInitListener, BootstrapListener, HasLogger
+implements VaadinServiceInitListener, SessionInitListener, HasLogger
 {
 	public VaadinApplicationInitListener()
 	{
@@ -28,7 +26,6 @@ implements VaadinServiceInitListener, SessionInitListener, BootstrapListener, Ha
 	public void serviceInit(final ServiceInitEvent event)
 	{
 		event.getSource().addSessionInitListener(this);
-		event.addBootstrapListener(this);
 	}
 
 	@Override
@@ -39,17 +36,4 @@ implements VaadinServiceInitListener, SessionInitListener, BootstrapListener, Ha
 		);
 	}
 
-	@Override
-	public void modifyBootstrapPage(final BootstrapPageResponse response)
-	{
-		final Element head = response.getDocument().head();
-		head.prependElement("link")
-			.attr("href", "frontend/images/favicon.svg")
-			.attr("rel", "icon")
-			.attr("type", "image/svg+xml");
-		head.prependElement("link")
-			.attr("href", "frontend/images/favicon.icon")
-			.attr("rel", "alternate icon");
-	}
-	
 }

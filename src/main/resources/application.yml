@@ -4,8 +4,6 @@ server.port: 8080
 vaadin:
     compatibilityMode: false
     original.frontend.resources: false
-    pnpm.enable: true
-    useDeprecatedV14Bootstrapping: true    
 
 logging.level.org.atmosphere: warn
  

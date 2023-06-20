@@ -1,17 +1,16 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import java.util.stream.Stream;
-
-import com.flowingcode.vaadin.addons.ironicons.IronIcons;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
-
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Shop;
 import one.microstream.demo.bookstore.data.Shops;
+import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import java.util.stream.Stream;
 
 /**
  * View to display {@link Shops}.
@@ -39,7 +38,7 @@ public class ViewShops extends ViewNamedWithAddress<Shop>
 		);
 		final Button showPurchasesButton = new Button(
 			this.getTranslation("showPurchases"),
-			IronIcons.SHOPPING_BASKET.create(),
+			LineAwesomeIcon.SHOPPING_CART_SOLID.create(),
 			event -> this.showPurchases(this.getSelectedEntity())
 		);
 

@@ -1,29 +1,26 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetary;
-
-import java.time.Year;
-import java.util.function.BinaryOperator;
-import java.util.stream.Stream;
-
-import com.vaadin.flow.function.SerializableFunction;
-import org.javamoney.moneta.function.MonetarySummaryStatistics;
-
 import com.google.common.collect.Range;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
-
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Customer;
 import one.microstream.demo.bookstore.data.Purchase;
 import one.microstream.demo.bookstore.data.PurchaseItem;
 import one.microstream.demo.bookstore.data.Purchases;
 import one.microstream.demo.bookstore.data.Shop;
+import org.javamoney.moneta.function.MonetarySummaryStatistics;
+
+import java.time.Year;
+import java.util.stream.Stream;
+
+import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetary;
 
 /**
  * View to display {@link Purchases}.
@@ -33,7 +30,7 @@ import one.microstream.demo.bookstore.data.Shop;
 public class ViewPurchases extends ViewEntity<Purchase>
 {
 	int      year = Year.now().getValue();
-	Label    totalColumnFooter;
+	Span    totalColumnFooter;
 	private FilterComboBox<Purchase, Shop> shopFilter;
 	private FilterComboBox<Purchase, Customer> customerFilter;
 
@@ -60,12 +57,12 @@ public class ViewPurchases extends ViewEntity<Purchase>
 		this.customerFilter = this.addGridColumnWithDynamicFilter("customer" , Purchase::customer);
 		this.addGridColumn                 ("timestamp", Purchase::timestamp               );
 		this.addGridColumn                 ("total"    , moneyRenderer(Purchase::total)    )
-			.setFooter(this.totalColumnFooter = new Label());
+			.setFooter(this.totalColumnFooter = new Span());
 
 		final Range<Integer> years = BookStoreDemo.getInstance().data().purchases().years();
 
 		final IntegerField yearField = new IntegerField();
-		yearField.setHasControls(true);
+		yearField.setStepButtonsVisible(true);
 		yearField.setMin(years.lowerEndpoint());
 		yearField.setMax(years.upperEndpoint());
 		yearField.setValue(this.year);
@@ -75,7 +72,7 @@ public class ViewPurchases extends ViewEntity<Purchase>
 		});
 
 		final HorizontalLayout bar = new HorizontalLayout(
-			new Label(this.getTranslation("year")),
+			new Span(this.getTranslation("year")),
 			yearField
 		);
 		bar.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
@@ -95,7 +92,7 @@ public class ViewPurchases extends ViewEntity<Purchase>
 		addGridColumn(grid, "price"    , moneyRenderer(PurchaseItem::price)            );
 		addGridColumn(grid, "amount"   , PurchaseItem::amount                          );
 		addGridColumn(grid, "total"    , moneyRenderer(PurchaseItem::itemTotal)        );
-		grid.setItems(purchase.items());
+		grid.setItems(purchase.items().toList());
 		grid.setAllRowsVisible(true);
 		return grid;
 	}
