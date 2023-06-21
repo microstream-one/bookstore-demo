@@ -1,10 +1,11 @@
 package one.microstream.demo.bookstore.ui.views;
 
-import javax.servlet.http.HttpServletResponse;
+import com.vaadin.flow.component.html.Paragraph;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.rapidpm.dependencies.core.logger.HasLogger;
 
-import com.vaadin.flow.component.html.Label;
+
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
@@ -45,7 +46,7 @@ public class ViewError extends VerticalLayout implements HasErrorParameter<Excep
 
 		this.logger().severe(message, parameter.getCaughtException());
 		
-		this.add(new Label(message));
+		this.add(new Paragraph(message));
 
 		return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 	}

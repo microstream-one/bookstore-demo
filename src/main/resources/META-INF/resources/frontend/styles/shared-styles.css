@@ -38,8 +38,13 @@ html {
 	--lumo-error-color: #faa;
 }
 
-.header {
-	background-color: #191520;
+header {
+    text-align: center;
+	padding: var(--lumo-space-l) var(--lumo-space-m);
+}
+
+vaadin-side-nav {
 	padding: var(--lumo-space-m);
 }
+
 
