@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
@@ -35,6 +37,7 @@ import one.microstream.storage.embedded.types.EmbeddedStorageManager;
  * @see Data#books()
  * @see ReadWriteLocked
  */
+@Slf4j
 public class Books extends ReadWriteLocked
 {
 	/*
@@ -130,6 +133,9 @@ public class Books extends ReadWriteLocked
 	 */
 	private void storeCollections(final Persister persister)
 	{
+		StopWatch stopWatch = StopWatch.createStarted();
+
+
 		persister.storeAll(
 			this.isbn13ToBook    ,
 			this.authorToBooks   ,
@@ -137,6 +143,8 @@ public class Books extends ReadWriteLocked
 			this.publisherToBooks,
 			this.languageToBooks
 		);
+		stopWatch.stop();
+		log.info("storeBook, time:{} ms", stopWatch.getTime());
 	}
 	
 	/**

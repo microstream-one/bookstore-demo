@@ -4,6 +4,7 @@ import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -18,12 +19,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @Push
 @Theme(themeClass = Lumo.class, variant = Lumo.DARK)
+@Slf4j
 public class VaadinApplication implements AppShellConfigurator
 {
-	public static void main(
-		final String[] args
-	)
+	public static void main(final String[] args)
 	{
+		log.info("starting");
 		SpringApplication.run(VaadinApplication.class, args);
 	}
 }

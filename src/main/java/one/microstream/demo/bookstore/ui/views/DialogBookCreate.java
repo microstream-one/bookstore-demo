@@ -158,7 +158,7 @@ public class DialogBookCreate extends Dialog
 		));
 	}
 
-	private static String generateIsbn13()
+	public static String generateIsbn13()
 	{
 		final Faker faker = Faker.instance();
 		final Books books = BookStoreDemo.getInstance().data().books();
