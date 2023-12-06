@@ -61,6 +61,16 @@ public class Shop extends NamedWithAddress
 	{
 		return this.employees.stream();
 	}
+	
+	/**
+	 * Get the employees.
+	 *
+	 * @return a {@link List} of {@link Employee}s
+	 */
+	public List<Employee> employeesList()
+	{
+		return new ArrayList<>(this.employees);
+	}
 
 	/**
 	 * Get the inventory.

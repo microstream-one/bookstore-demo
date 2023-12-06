@@ -1,24 +1,29 @@
 
-server.port: 8080
+server.port: ${PORT:8080}
 
-vaadin:
-    compatibilityMode: false
-    original.frontend.resources: false
+logging.level: 
+  root: info
+  org.atmosphere: warn
 
-logging.level.org.atmosphere: warn
+vaadin.whitelisted-packages: com.vaadin,org.vaadin,one.microstream,graphql
  
-graphql.playground:
+graphql:
+  playground:
+    enabled: true
     tabs:
-        - name: Books by Title
-          query: classpath:META-INF/resources/graphql/booksByTitle.graphql
-        - name: Employee of the Year
-          query: classpath:META-INF/resources/graphql/employeeOfTheYear.graphql
-        - name: Bestseller
-          query: classpath:META-INF/resources/graphql/bestSellerList.graphql
-        - name: Bestseller By Country
-          query: classpath:META-INF/resources/graphql/bestSellerListByCountry.graphql
-        - name: Purchases of Foreigners
-          query: classpath:META-INF/resources/graphql/purchasesOfForeigners.graphql
-        - name: Purchases of Foreigners By Country
-          query: classpath:META-INF/resources/graphql/purchasesOfForeignersByCountry.graphql
+      - name: Books by Title
+        query: classpath:META-INF/resources/graphql/booksByTitle.graphql
+      - name: Employee of the Year
+        query: classpath:META-INF/resources/graphql/employeeOfTheYear.graphql
+      - name: Bestseller
+        query: classpath:META-INF/resources/graphql/bestSellerList.graphql
+      - name: Bestseller By Country
+        query: classpath:META-INF/resources/graphql/bestSellerListByCountry.graphql
+      - name: Purchases of Foreigners
+        query: classpath:META-INF/resources/graphql/purchasesOfForeigners.graphql
+      - name: Purchases of Foreigners By Country
+        query: classpath:META-INF/resources/graphql/purchasesOfForeignersByCountry.graphql
+  voyager:
+    enabled: true
+    
         

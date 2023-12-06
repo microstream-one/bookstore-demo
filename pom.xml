@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.0</version>
+		<version>3.2.0</version>
 	</parent>
 
 	<groupId>one.microstream</groupId>
@@ -38,8 +38,8 @@
 		<java.version>17</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<microstream.version>08.00.00-MS-GA</microstream.version>
-		<lucene.version>8.11.1</lucene.version>
-		<vaadin.version>24.1.0</vaadin.version>
+		<lucene.version>8.11.2</lucene.version>
+		<vaadin.version>24.2.5</vaadin.version>
 	</properties>
 
 	<dependencyManagement>
@@ -89,12 +89,12 @@
 			<groupId>com.github.javafaker</groupId>
 			<artifactId>javafaker</artifactId>
 			<version>1.0.2</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>org.yaml</groupId>
-                                <artifactId>snakeyaml</artifactId>
-                            </exclusion>
-                        </exclusions>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.yaml</groupId>
+                    <artifactId>snakeyaml</artifactId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
@@ -130,26 +130,9 @@
 			<version>1.1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.graphql-java</groupId>
-			<artifactId>graphql-java</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.graphql-java</groupId>
-			<artifactId>graphql-java-spring-boot-starter-webmvc</artifactId>
-			<version>2.0</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.graphql-java-kickstart</groupId>
-			<artifactId>playground-spring-boot-starter</artifactId>
-			<version>7.1.0</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.graphql-java-kickstart</groupId>
-			<artifactId>voyager-spring-boot-starter</artifactId>
-			<version>7.0.1</version>
-			<scope>runtime</scope>
+			<artifactId>graphql-spring-boot-starter</artifactId>
+			<version>15.0.0</version>
 		</dependency>
 	</dependencies>
 

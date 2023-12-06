@@ -102,6 +102,16 @@ public class Purchase
 		return this.items.stream();
 	}
 
+	/**
+	 * Get all {@link PurchaseItem}s of this purchase
+	 *
+	 * @return a {@link List} of {@link PurchaseItem}s
+	 */
+	public List<PurchaseItem> itemsList()
+	{
+		return new ArrayList<>(this.items);
+	}
+
 	public int itemCount()
 	{
 		return this.items.size();

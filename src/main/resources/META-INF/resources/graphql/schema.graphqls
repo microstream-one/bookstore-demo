@@ -76,7 +76,7 @@ type Customer {
 type Shop {
 	name: String
 	address: Address
-	employees: [Employee]
+	employeesList: [Employee]
 }
 
 type PurchaseItem {
@@ -87,7 +87,7 @@ type PurchaseItem {
 }
 
 type Purchase {
-	items: [PurchaseItem]
+	itemsList: [PurchaseItem]
 	customer: Customer
 	employee: Employee
 	shop: Shop
