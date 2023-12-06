@@ -1,6 +1,15 @@
 package one.microstream.demo.bookstore.ui.views;
 
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.money.MonetaryAmount;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.grid.Grid;
@@ -8,25 +17,15 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.BeforeEvent;
+
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Named;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.money.MonetaryAmount;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Abstract view to display entities in a {@link Grid}.
@@ -55,7 +54,7 @@ public abstract class ViewEntity<E> extends VerticalLayout
 			this.createUI();
 			this.add(this.grid);
 
-			listEntities();
+			this.listEntities();
 		});
 	}
 
@@ -73,21 +72,22 @@ public abstract class ViewEntity<E> extends VerticalLayout
 	}
 
 
-	public void listEntities() {
-		grid.setItems(q -> {
-			var comparators = q.getSortOrders().stream().map(so ->
-					grid.getColumnByKey(so.getSorted()).getComparator(so.getDirection())
+	public void listEntities()
+	{
+		this.grid.setItems(q -> {
+			final var comparators = q.getSortOrders().stream().map(so ->
+					this.grid.getColumnByKey(so.getSorted()).getComparator(so.getDirection())
 			).collect(Collectors.toList());
-			return compute(stream -> {
-				stream = stream.filter(getPredicate());
-				for(Comparator c : comparators) {
+			return this.compute(stream -> {
+				stream = stream.filter(this.getPredicate());
+				for(final var c : comparators) {
 					stream = stream.sorted(c);
 				}
 				return stream.skip(q.getOffset())
 						.limit(q.getLimit());
 			});
 		});
-		filterFields.forEach(f -> f.updateOptions());
+		this.filterFields.forEach(f -> f.updateOptions());
 	}
 	
 	protected abstract void createUI();
@@ -205,7 +205,7 @@ public abstract class ViewEntity<E> extends VerticalLayout
 		);
 
 		combo.setItems(query -> {
-			return compute(s -> s.filter(getPredicate())
+			return this.compute(s -> s.filter(this.getPredicate())
 					.map(valueProvider))
 					.distinct()
 					.filter(f -> StringUtils.containsIgnoreCase(f.name(), query.getFilter().get()))
@@ -213,7 +213,7 @@ public abstract class ViewEntity<E> extends VerticalLayout
 					.limit(query.getLimit());
 		});
 
-		combo.addValueChangeListener(event -> listEntities());
+		combo.addValueChangeListener(event -> this.listEntities());
 
 		this.addGridColumn(
 			title,

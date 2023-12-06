@@ -2,10 +2,7 @@ package one.microstream.demo.bookstore.ui.views;
 
 import java.util.Collection;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.data.provider.DataProvider;
 
 import one.microstream.demo.bookstore.data.Named;
 
@@ -14,7 +11,6 @@ import one.microstream.demo.bookstore.data.Named;
  *
  * @param <T> the entity type
  */
-@SuppressWarnings("serial")
 public class ComboBoxNamed<T extends Named> extends ComboBox<T>
 {
 	public ComboBoxNamed()

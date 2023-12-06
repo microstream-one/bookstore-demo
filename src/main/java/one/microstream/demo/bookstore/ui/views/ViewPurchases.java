@@ -1,5 +1,12 @@
 package one.microstream.demo.bookstore.ui.views;
 
+import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetary;
+
+import java.time.Year;
+import java.util.stream.Stream;
+
+import org.javamoney.moneta.function.MonetarySummaryStatistics;
+
 import com.google.common.collect.Range;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
@@ -9,18 +16,13 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
+
 import one.microstream.demo.bookstore.BookStoreDemo;
 import one.microstream.demo.bookstore.data.Customer;
 import one.microstream.demo.bookstore.data.Purchase;
 import one.microstream.demo.bookstore.data.PurchaseItem;
 import one.microstream.demo.bookstore.data.Purchases;
 import one.microstream.demo.bookstore.data.Shop;
-import org.javamoney.moneta.function.MonetarySummaryStatistics;
-
-import java.time.Year;
-import java.util.stream.Stream;
-
-import static org.javamoney.moneta.function.MonetaryFunctions.summarizingMonetary;
 
 /**
  * View to display {@link Purchases}.
@@ -39,14 +41,16 @@ public class ViewPurchases extends ViewEntity<Purchase>
 		super();
 	}
 
-	public void filterBy(Shop shop) {
-		shopFilter.setValue(shop);
-		listEntities();
+	public void filterBy(final Shop shop)
+	{
+		this.shopFilter.setValue(shop);
+		this.listEntities();
 	}
 
-	public void filterBy(Customer customer) {
-		customerFilter.setValue(customer);
-		listEntities();
+	public void filterBy(final Customer customer)
+	{
+		this.customerFilter.setValue(customer);
+		this.listEntities();
 	}
 
 	@Override
@@ -68,7 +72,7 @@ public class ViewPurchases extends ViewEntity<Purchase>
 		yearField.setValue(this.year);
 		yearField.addValueChangeListener(event -> {
 			this.year = event.getValue();
-			listEntities();
+			this.listEntities();
 		});
 
 		final HorizontalLayout bar = new HorizontalLayout(
@@ -89,16 +93,16 @@ public class ViewPurchases extends ViewEntity<Purchase>
 		addGridColumn(grid, "book"     , item -> item.book().title()           );
 		addGridColumn(grid, "author"   , item -> item.book().author().name()   );
 		addGridColumn(grid, "publisher", item -> item.book().publisher().name());
-		addGridColumn(grid, "price"    , moneyRenderer(PurchaseItem::price)            );
-		addGridColumn(grid, "amount"   , PurchaseItem::amount                          );
-		addGridColumn(grid, "total"    , moneyRenderer(PurchaseItem::itemTotal)        );
+		addGridColumn(grid, "price"    , moneyRenderer(PurchaseItem::price)    );
+		addGridColumn(grid, "amount"   , PurchaseItem::amount                  );
+		addGridColumn(grid, "total"    , moneyRenderer(PurchaseItem::itemTotal));
 		grid.setItems(purchase.items().toList());
 		grid.setAllRowsVisible(true);
 		return grid;
 	}
 
 	@Override
-	public <R> R compute(SerializableFunction<Stream<Purchase>, R> function)
+	public <R> R compute(final SerializableFunction<Stream<Purchase>, R> function)
 	{
 		return BookStoreDemo.getInstance().data().purchases().computeByYear(
 			this.year,
@@ -107,16 +111,20 @@ public class ViewPurchases extends ViewEntity<Purchase>
 	}
 
 	@Override
-	public void listEntities() {
+	public void listEntities()
+	{
 		super.listEntities();
-		try {
-			final MonetarySummaryStatistics stats = compute(stream ->
-					stream.filter(getPredicate())
+		try
+		{
+			final MonetarySummaryStatistics stats = this.compute(stream ->
+					stream.filter(this.getPredicate())
 							.map(Purchase::total)
 							.collect(summarizingMonetary(BookStoreDemo.CURRENCY_UNIT)));
 			this.totalColumnFooter.setText(
 					BookStoreDemo.MONETARY_AMOUNT_FORMAT.format(stats.getSum()));
-		} catch (Exception e) {
+		}
+		catch(final Exception e)
+		{
 			// division by zero
 			this.totalColumnFooter.setText("-");
 		}
